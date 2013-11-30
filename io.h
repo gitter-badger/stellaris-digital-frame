@@ -76,13 +76,6 @@
 #define MMC_SO_HIGH()                  GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_5, GPIO_PIN_5)
 
 //----- PROTOTYPES -----
-void                                   vs_ssi_wait(void);
-void                                   vs_ssi_writewait(void);
-void                                   vs_ssi_write(unsigned char c);
-unsigned char                          vs_ssi_readwrite(unsigned char c);
-void                                   vs_ssi_speed(unsigned long speed);
-#endif //LOADER
-
 void                                   ssi_wait(void);
 void                                   ssi_write(unsigned char c);
 unsigned char                          ssi_readwrite(unsigned char c);
@@ -91,8 +84,6 @@ void                                   ssi_off(void);
 void                                   ssi_on(void);
 
 void                                   pwm_led(unsigned int power);
-
-#ifndef LOADER
 
 void                                   cpu_speed(unsigned int low_speed);
 void                                   cpu_reset(void);

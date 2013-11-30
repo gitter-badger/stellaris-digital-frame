@@ -17,7 +17,7 @@
 
 volatile int sw_pressed = 0;
 
-void vs_ssi_wait(void)
+void ssi_wait(void)
 {
 	unsigned long r;
 
@@ -31,22 +31,23 @@ void vs_ssi_wait(void)
 	return;
 }
 
-void vs_ssi_writewait(void)
-{
-	while (HWREG(SSI0_BASE + SSI_O_SR) & SSI_SR_BSY)
-		;  //busy?
-
-	return;
-}
-
-void vs_ssi_write(unsigned char c)
+void ssi_write(unsigned char c)
 {
 	SSIDataPut(SSI0_BASE, c);
 
 	return;
 }
 
-unsigned char vs_ssi_readwrite(unsigned char c)
+unsigned char ssi_read(void)
+{
+	unsigned long r;
+
+	SSIDataGet(SSI0_BASE, &r);
+
+	return (unsigned char) r;
+}
+
+unsigned char ssi_readwrite(unsigned char c)
 {
 	unsigned long r;
 
@@ -56,7 +57,7 @@ unsigned char vs_ssi_readwrite(unsigned char c)
 	return (unsigned char) r;
 }
 
-void vs_ssi_speed(unsigned long speed)
+void ssi_speed(unsigned long speed)
 {
 	unsigned long clk;
 
@@ -80,83 +81,19 @@ void vs_ssi_speed(unsigned long speed)
 	return;
 }
 
-void ssi_wait(void)
-{
-	unsigned long r;
-
-	while (HWREG(SSI1_BASE + SSI_O_SR) & SSI_SR_BSY)
-		;  //busy?
-	//while(!(HWREG(SSI1_BASE + SSI_O_SR) & SSI_SR_TFE));  //transmit fifo empty?
-
-	while (SSIDataGetNonBlocking(SSI1_BASE, &r))
-		; //clear receive fifo
-
-	return;
-}
-
-void ssi_write(unsigned char c)
-{
-	SSIDataPut(SSI1_BASE, c);
-
-	return;
-}
-
-unsigned char ssi_read(void)
-{
-	unsigned long r;
-
-	SSIDataGet(SSI1_BASE, &r);
-
-	return (unsigned char) r;
-}
-
-unsigned char ssi_readwrite(unsigned char c)
-{
-	unsigned long r;
-
-	SSIDataPut(SSI1_BASE, c);
-	SSIDataGet(SSI1_BASE, &r);
-
-	return (unsigned char) r;
-}
-
-void ssi_speed(unsigned long speed)
-{
-	unsigned long clk;
-
-	clk = SysCtlClockGet();
-
-	if ((speed == 0) || (speed > (clk / 2)))
-	{
-		speed = clk / 2;
-	}
-
-	if (speed > SSI_SPEED)
-	{
-		speed = SSI_SPEED;
-	}
-
-	SSIDisable(SSI1_BASE);
-	SSIConfigSetExpClk(SSI1_BASE, clk, SSI_FRF_MOTO_MODE_0, SSI_MODE_MASTER,
-			speed, 8);
-	SSIEnable(SSI1_BASE);
-
-	return;
-}
-
 void ssi_off(void)
 {
 	ssi_wait();
 
-	GPIOPinTypeGPIOOutput(GPIO_PORTE_BASE, GPIO_PIN_0 | GPIO_PIN_3); //SCK, SI = gpio
-	GPIOPinWrite(GPIO_PORTE_BASE, GPIO_PIN_0 | GPIO_PIN_3, 0); //SCK, SI = low
+	GPIOPinTypeGPIOOutput(GPIO_PORTA_BASE, GPIO_PIN_2 | GPIO_PIN_5); //SCK, SI = gpio
+	GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_2 | GPIO_PIN_5, 0); //SCK, SI = low
 
 	return;
 }
 
 void ssi_on(void)
 {
-	GPIOPinTypeSSI(GPIO_PORTE_BASE, GPIO_PIN_0 | GPIO_PIN_3); //SCK, SI = ssi
+	GPIOPinTypeSSI(GPIO_PORTA_BASE, GPIO_PIN_2 | GPIO_PIN_5); //SCK, SI = ssi
 
 	return;
 }
@@ -237,9 +174,7 @@ void cpu_speed(unsigned int low_speed)
 		SysTickEnable();
 		pwm_led(LCD_PWMSTANDBY);
 		ssi_speed(0);
-#ifndef LOADER
-		vs_ssi_speed(0);
-#endif
+
 	}
 	else
 	{
@@ -255,9 +190,6 @@ void cpu_speed(unsigned int low_speed)
 		SysTickEnable();
 		pwm_led(100);
 		ssi_speed(0);
-#ifndef LOADER
-		vs_ssi_speed(0);
-#endif
 	}
 
 	IntMasterEnable();
