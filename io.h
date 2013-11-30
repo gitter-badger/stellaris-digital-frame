@@ -55,32 +55,25 @@
 #endif
 
 //--- Pins ---
+
 //LCD
-#define LCD_RST_DISABLE()              GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_5, GPIO_PIN_5)
-#define LCD_RST_ENABLE()               GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_5, 0)
-#define LCD_CS_DISABLE()               GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_6, GPIO_PIN_6)
-#define LCD_CS_ENABLE()                GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_6, 0)
-#define LCD_RS_DISABLE()               GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_4, GPIO_PIN_4)
-#define LCD_RS_ENABLE()                GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_4, 0)
+#define LCD_RST_DISABLE()              GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_0, GPIO_PIN_0)
+#define LCD_RST_ENABLE()               GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_0, 0)
+#define LCD_CS_DISABLE()               GPIOPinWrite(GPIO_PORTJ_BASE, GPIO_PIN_0, GPIO_PIN_0)
+#define LCD_CS_ENABLE()                GPIOPinWrite(GPIO_PORTJ_BASE, GPIO_PIN_0, 0)
+#define LCD_RS_DISABLE()               GPIOPinWrite(GPIO_PORTJ_BASE, GPIO_PIN_1, GPIO_PIN_1)
+#define LCD_RS_ENABLE()                GPIOPinWrite(GPIO_PORTJ_BASE, GPIO_PIN_1, 0)
 //SD
-#define MMC_POWERON()                  GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_0, 0); \
-                                       GPIOPadConfigSet(GPIO_PORTB_BASE, GPIO_PIN_0, GPIO_STRENGTH_4MA, GPIO_PIN_TYPE_STD)
-#define MMC_POWEROFF()                 GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_0, GPIO_PIN_0); \
-                                       GPIOPadConfigSet(GPIO_PORTB_BASE, GPIO_PIN_0, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD_WPU)
-#define MMC_SELECT()                   GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_1, 0)
-#define MMC_DESELECT()                 GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_1, GPIO_PIN_1)
-#define MMC_SCK_LOW()                  GPIOPinWrite(GPIO_PORTE_BASE, GPIO_PIN_0, 0)
-#define MMC_SCK_HIGH()                 GPIOPinWrite(GPIO_PORTE_BASE, GPIO_PIN_0, GPIO_PIN_0)
-#define MMC_SI_LOW()                   GPIOPinWrite(GPIO_PORTE_BASE, GPIO_PIN_3, 0)
-#define MMC_SI_HIGH()                  GPIOPinWrite(GPIO_PORTE_BASE, GPIO_PIN_3, GPIO_PIN_3)
-//VS
-#define VS_DREQ_READ()                 GPIOPinRead(GPIO_PORTA_BASE, GPIO_PIN_1)
-#define VS_RST_DISABLE()               GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_7, GPIO_PIN_7)
-#define VS_RST_ENABLE()                GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_7, 0)
-#define VS_CS_DISABLE()                GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_6, GPIO_PIN_6)
-#define VS_CS_ENABLE()                 GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_6, 0)
-#define VS_DCS_DISABLE()               GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_3, GPIO_PIN_3)
-#define VS_DCS_ENABLE()                GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_3, 0)
+#define MMC_POWERON()                  GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_6, GPIO_PIN_6); \
+                                       GPIOPadConfigSet(GPIO_PORTA_BASE, GPIO_PIN_6, GPIO_STRENGTH_4MA, GPIO_PIN_TYPE_STD)
+#define MMC_POWEROFF()                 GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_6, 0); \
+                                       GPIOPadConfigSet(GPIO_PORTA_BASE, GPIO_PIN_0, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD_WPU)
+#define MMC_SELECT()                   GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_3, 0)
+#define MMC_DESELECT()                 GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_3, GPIO_PIN_3)
+#define MMC_SCK_LOW()                  GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_2, 0)
+#define MMC_SCK_HIGH()                 GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_2, GPIO_PIN_2)
+#define MMC_SO_LOW()                   GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_5, 0)
+#define MMC_SO_HIGH()                  GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_5, GPIO_PIN_5)
 
 //----- PROTOTYPES -----
 void                                   vs_ssi_wait(void);

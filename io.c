@@ -5,7 +5,6 @@
 #include "inc/hw_ints.h"
 #include "inc/hw_sysctl.h"
 #include "inc/hw_ssi.h"
-#include "inc/hw_ethernet.h"
 #include "driverlib/sysctl.h"
 #include "driverlib/gpio.h"
 #include "driverlib/interrupt.h"
@@ -13,10 +12,7 @@
 #include "driverlib/timer.h"
 #include "driverlib/watchdog.h"
 #include "driverlib/pwm.h"
-#include "driverlib/qei.h"
 #include "driverlib/ssi.h"
-#include "driverlib/uart.h"
-#include "driverlib/ethernet.h"
 #include "io.h"
 
 volatile int sw_pressed = 0;
