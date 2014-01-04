@@ -1,6 +1,6 @@
 #ifndef _MAIN_H_
 #define _MAIN_H_
-
+#include "tools.h"
 
 //----- DEFINES -----
 //Application settings
@@ -22,21 +22,6 @@
 #define DAY_CHANGED                    (1<<4)
 #define ALARM_PLAY                     (1<<5)
 #define ALARM_STANDBY                  (1<<6)
-
-
-
-//----- PROTOTYPES -----
-void                                   systick(void);
-char*                                  getclock(void);
-char*                                  getdate(void);
-void                                   gettime(TIME* t);
-void                                   settime(unsigned long s);
-long                                   getdeltatime(long t);
-long                                   getontime(void);
-
-unsigned int                           standby_isactive(void);
-void                                   standby_off(void);
-unsigned int                           standby(unsigned int param);
 
 
 #endif //_MAIN_H_

@@ -129,30 +129,6 @@ void pwm_led(unsigned int power)
 	return;
 }
 
-int keys_steps(void) //encoder: four step, qei config: two step (see errata)
-{
-	long i;
-
-	i = QEIPositionGet(QEI_BASE);
-	if (i)
-	{
-		QEIPositionSet(QEI_BASE, i & 0x01);
-		return (int) (long) i >> 1;
-	}
-
-	return 0;
-}
-
-int keys_sw(void)
-{
-	int sw;
-
-	sw = sw_pressed;
-	sw_pressed = 0;
-
-	return sw;
-}
-
 void cpu_speed(unsigned int low_speed)
 {
 	delay_ms(10);
@@ -253,10 +229,10 @@ void init_bor(unsigned int on)
 void init_periph(void)
 {
 	//init pwm for backlight
-	SysCtlPeripheralEnable(SYSCTL_PERIPH_PWM);
-	SysCtlPeripheralReset(SYSCTL_PERIPH_PWM);
-	PWMGenConfigure(PWM1_BASE, PWM_GEN_2,
-			PWM_GEN_MODE_DOWN | PWM_GEN_MODE_NO_SYNC);
+//	SysCtlPeripheralEnable(SYSCTL_PERIPH_PWM);
+//	SysCtlPeripheralReset(SYSCTL_PERIPH_PWM);
+//	PWMGenConfigure(PWM1_BASE, PWM_GEN_2,
+//			PWM_GEN_MODE_DOWN | PWM_GEN_MODE_NO_SYNC);
 
 	//init ssi0: SD
 	SysCtlPeripheralEnable(SYSCTL_PERIPH_SSI0);
@@ -274,7 +250,7 @@ void init_periph(void)
 	SSIConfigSetExpClk(SSI1_BASE, SysCtlClockGet(), SSI_FRF_MOTO_MODE_0,
 			SSI_MODE_MASTER, SysCtlClockGet() / 4, 8);
 	SSIEnable(SSI1_BASE);
-	SSIDataPutNonBlocking(SSI1_BASE, 0xff);
+	SSIDataPut(SSI1_BASE, 0xff);
 	SSIDataPutNonBlocking(SSI1_BASE, 0xff);
 	SSIDataPutNonBlocking(SSI1_BASE, 0xff); //dummy write to set ssi fifo bits
 

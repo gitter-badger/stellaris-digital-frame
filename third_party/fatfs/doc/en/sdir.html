@@ -4,7 +4,6 @@
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 <meta http-equiv="Content-Style-Type" content="text/css">
 <link rel="up" title="FatFs" href="../00index_e.html">
-<link rel="alternate" hreflang="ja" title="Japanese" href="../ja/sdir.html">
 <link rel="stylesheet" href="../css_e.css" type="text/css" media="screen" title="ELM Default">
 <title>FatFs - DIR</title>
 </head>
@@ -13,21 +12,27 @@
 
 <div class="para">
 <h2>DIR</h2>
-<p>The <tt>DIR</tt> structure is used for the work area to read a directory by f_oepndir, f_readdir function. There is no member that can be changed by application.</p>
+<p>The <tt>DIR</tt> structure is used for the work area to read a directory by f_oepndir and f_readdir functions.</p>
+<h4>FatFs</h4>
 <pre>
-<span class="k">typedef</span> <span class="k">struct</span> {
-    FATFS*  fs;         <span class="c">/* Pointer to the owner file system object */</span>
-    WORD    id;         <span class="c">/* Owner file system mount ID */</span>
-    WORD    index;      <span class="c">/* Directory index number to be read/write next */</span>
-    DWORD   sclust;     <span class="c">/* Table start cluster (0:Root dir) */</span>
-    DWORD   clust;      <span class="c">/* Current cluster */</span>
-    DWORD   sect;       <span class="c">/* Current sector */</span>
-    BYTE*   dir;        <span class="c">/* Pointer to the current SFN entry in the win[] */</span>
-    BYTE*   fn;         <span class="c">/* Pointer to the SFN (in/out) {file[8],ext[3],status[1]} */</span>
-<span class="k">#if</span> _USE_LFN
-    WCHAR*  lfn;        <span class="c">/* Pointer to the LFN working buffer */</span>
-    WORD    lfn_idx;    <span class="c">/* Last matched LFN index (0xFFFF:No LFN) */</span>
-<span class="k">#endif</span>
+typedef struct _DIR {
+    WORD    id;          /* Owner file system mount ID (inverted) */
+    WORD    index;       /* Current index */
+    FATFS*  fs;          /* Pointer to the owner file system object */
+    DWORD   sclust;      /* Start cluster */
+    DWORD   clust;       /* Current cluster */
+    DWORD   sect;        /* Current sector */
+} DIR;
+</pre>
+<h4>Tiny-FatFs</h4>
+<pre>
+typedef struct _DIR {
+    WORD    id;          /* Owner file system mount ID (inverted) */
+    WORD    index;       /* Current index */
+    FATFS*  fs;          /* Pointer to the owner file system object */
+    CLUST   sclust;      /* Start cluster */
+    CLUST   clust;       /* Current cluster */
+    DWORD   sect;        /* Current sector */
 } DIR;
 </pre>
 </div>

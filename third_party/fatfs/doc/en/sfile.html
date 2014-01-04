@@ -4,7 +4,6 @@
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 <meta http-equiv="Content-Style-Type" content="text/css">
 <link rel="up" title="FatFs" href="../00index_e.html">
-<link rel="alternate" hreflang="ja" title="Japanese" href="../ja/sfile.html">
 <link rel="stylesheet" href="../css_e.css" type="text/css" media="screen" title="ELM Default">
 <title>FatFs - FIL</title>
 </head>
@@ -13,35 +12,42 @@
 
 <div class="para">
 <h2>FIL</h2>
-<p>The FIL structure (file object) holds state of an open file. It is created by f_open function and discarded by f_close function. There is no member that can be changed by the application program except for <tt>cltbl</tt>. Note that a sector buffer is defined in this structure under non-tiny configuration so that the FIL structures should not be defined as auto variable.</p>
+<p>The FIL structure (file object) holds state of a file. It is created by f_open function and discarded by f_close function. There is no member that can be changed by the application program.</p>
 
+<h4>FatFs</h4>
 <pre>
-<span class="k">typedef</span> <span class="k">struct</span> {
-    FATFS*  fs;           <span class="c">/* Pointer to the owner file system object */</span>
-    WORD    id;           <span class="c">/* Owner file system mount ID */</span>
-    BYTE    flag;         <span class="c">/* File status flags */</span>
-    BYTE    pad1;
-    DWORD   fptr;         <span class="c">/* File read/write pointer (Byte offset origin from top of the file) */</span>
-    DWORD   fsize;        <span class="c">/* File size */</span>
-    DWORD   sclust;       <span class="c">/* File start cluster */</span>
-    DWORD   clust;        <span class="c">/* Current cluster */</span>
-    DWORD   dsect;        <span class="c">/* Current data sector */</span>
-<span class="k">#if</span> !_FS_READONLY
-    DWORD   dir_sect;     <span class="c">/* Sector containing the directory entry */</span>
-    BYTE*   dir_ptr;      <span class="c">/* Ponter to the directory entry in the window */</span>
-<span class="k">#endif</span>
-<span class="k">#if</span> _USE_FASTSEEK
-    DWORD*  cltbl;        <span class="c">/* Pointer to the cluster link map table (Nulled on file open) */</span>
-<span class="k">#endif</span>
-<span class="k">#if</span> _FS_SHARE
-    UINT    lockid;       <span class="c">/* File lock ID */</span>
-<span class="k">#endif</span>
-<span class="k">#if</span> !_FS_TINY
-    BYTE    buf[_MAX_SS]; <span class="c">/* Data read/write buffer */</span>
-<span class="k">#endif</span>
+typedef struct _FIL {
+    WORD    id;             /* Owner file system mount ID (inverted) */
+    BYTE    flag;           /* File status flags */
+    BYTE    sect_clust;     /* Left sectors in cluster */
+    FATFS*  fs;             /* Pointer to the owner file system object */
+    DWORD   fptr;           /* File R/W pointer */
+    DWORD   fsize;          /* File size */
+    DWORD   org_clust;      /* File start cluster */
+    DWORD   curr_clust;     /* Current cluster */
+    DWORD   curr_sect;      /* Current sector */
+    DWORD   dir_sect;       /* Sector containing the directory entry */
+    BYTE*   dir_ptr;        /* Ponter to the directory entry in the window */
+    BYTE    buffer[512];    /* File R/W buffer */
 } FIL;
 </pre>
 
+<h4>Tiny-FatFs</h4>
+<pre>
+typedef struct _FIL {
+    WORD    id;             /* Owner file system mount ID (inverted) */
+    BYTE    flag;           /* File status flags */
+    BYTE    sect_clust;     /* Left sectors in cluster */
+    FATFS*  fs;             /* Pointer to owner file system */
+    DWORD   fptr;           /* File R/W pointer */
+    DWORD   fsize;          /* File size */
+    CLUST   org_clust;      /* File start cluster */
+    CLUST   curr_clust;     /* Current cluster */
+    DWORD   curr_sect;      /* Current sector */
+    DWORD   dir_sect;       /* Sector containing the directory entry */
+    BYTE*   dir_ptr;        /* Ponter to the directory entry in the window */
+} FIL;
+</pre>
 </div>
 
 <p class="foot"><a href="../00index_e.html">Return</a></p>
