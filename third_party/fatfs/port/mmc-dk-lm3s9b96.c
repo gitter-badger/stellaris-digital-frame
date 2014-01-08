@@ -176,11 +176,11 @@ void power_on(void)
 	SysCtlPeripheralEnable(SDCARD_CS_PERIPH);
 	SysCtlPeripheralEnable(SDCARD_VCC_PERIPH);
 
-
 	/* Set Power on - forever */
-	GPIOPadConfigSet(SDCARD_VCC_BASE, SDCARD_VCC_PIN, GPIO_STRENGTH_8MA,GPIO_PIN_TYPE_STD);
-	GPIOPinTypeGPIOOutput(SDCARD_VCC_BASE,SDCARD_VCC_PIN);
-	GPIOPinWrite(SDCARD_VCC_BASE,SDCARD_VCC_PIN,SDCARD_VCC_PIN);
+	GPIOPadConfigSet(SDCARD_VCC_BASE, SDCARD_VCC_PIN, GPIO_STRENGTH_8MA,
+			GPIO_PIN_TYPE_STD);
+	GPIOPinTypeGPIOOutput(SDCARD_VCC_BASE, SDCARD_VCC_PIN);
+	GPIOPinWrite(SDCARD_VCC_BASE, SDCARD_VCC_PIN, SDCARD_VCC_PIN);
 
 	/*
 	 * Configure the appropriate pins to be SSI instead of GPIO. The CS
@@ -191,14 +191,13 @@ void power_on(void)
 	GPIOPinTypeGPIOOutput(SDCARD_CS_BASE, SDCARD_CS_PIN);
 
 	GPIOPadConfigSet(SDC_GPIO_PORT_BASE, SDC_SSI_RX, GPIO_STRENGTH_4MA,
-	                         GPIO_PIN_TYPE_STD_WPU);
-	GPIOPadConfigSet(SDC_GPIO_PORT_BASE, SDC_SSI_CLK | SDC_SSI_TX | SDCARD_CS_PIN,
-	                         GPIO_STRENGTH_4MA, GPIO_PIN_TYPE_STD);
-
+			GPIO_PIN_TYPE_STD_WPU);
+	GPIOPadConfigSet(SDC_GPIO_PORT_BASE,
+			SDC_SSI_CLK | SDC_SSI_TX | SDCARD_CS_PIN, GPIO_STRENGTH_4MA,
+			GPIO_PIN_TYPE_STD);
 
 	/* Deassert the SSI0 chip selects for both the SD card and serial flash */
 	GPIOPinWrite(SDCARD_CS_BASE, SDCARD_CS_PIN, SDCARD_CS_PIN);
-
 
 	/* Configure the SSI0 port */
 	SSIConfigSetExpClk(SDC_SSI_BASE, SysCtlClockGet(), SSI_FRF_MOTO_MODE_0,

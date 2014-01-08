@@ -47,14 +47,13 @@ extern void LCDBP320x240x16_SSD1289Init(void);
 extern void LCDBP320x240x16_SSD1289BacklightOn(unsigned char ucBrightness);
 extern void LCDBP320x240x16_SSD1289BacklightOff(void);
 
-extern void WriteDataSec(uINT_32 usData, uINT_32 num);
-extern void WriteData(uINT_32 usData);
+extern void WriteDataSec(uINT_16 usData, uINT_16 num);
+extern void WriteData(uINT_16 usData);
 extern void WriteCommand(uINT_8 usData);
 //void WriteData5(unsigned short int usData);
 //void init0();
 extern void setxy(uINT_16 x,uINT_16 y );
 
-extern const tDisplay g_sLCDBP320x240x16_SSD1289;
 ////****
 extern uINT_16 LCDBPV2_ColorTranslate(uINT_16 ulValue);
 extern void	LCDBPV2_LineDrawV(uINT_16 lX, uINT_16 lY1, uINT_16 lY2, uINT_16 ulValue);
@@ -67,6 +66,65 @@ extern void LCDBPV2_CircleFill(uINT_16 lX, uINT_16 lY, uINT_16 lRadius, uINT_16 
 extern void LCDBPV2_CircleDraw(uINT_16 lX, uINT_16 lY, uINT_16 lRadius, uINT_16 ulValue);
 extern void LCDBPV2_StringDraw_(const tContext *pContext, const char *pcString, long lLength, long lX, long lY, unsigned long bOpaque);
 extern void LCDBPV2_StringDraw(const tFont *pFont,const uINT_8 *pcString, uINT_16 lX, uINT_16 lY, uINT_16 bOpaque, uINT_16 ulValue);
+
+extern const tDisplay g_sLCDBP320x240x16_SSD1289;
+
+
+
+//*****************************************************************************
+//
+// Defines for the pins that are used to communicate with the SSD1289.
+//
+//*****************************************************************************
+
+//pinmap:
+//Data-High:	D0, D1, D2, D3, A4, A5, A6, A7
+//Data-Low:		B0, B1, B2, B3, B4, B5, B6, B7
+//Command:		RD: Pullup,		RST: C4,
+//				CS: C7,		RS(DC): C6,
+//				WR: C5		BL: D6
+
+//
+//
+
+#define LCD_DATAL_PERIPH        SYSCTL_PERIPH_GPIOD
+#define LCD_DATAL_BASE          GPIO_PORTD_BASE
+
+#define LCD_DATAH_PERIPH        SYSCTL_PERIPH_GPIOE
+#define LCD_DATAH_BASE          GPIO_PORTE_BASE
+
+#define LCD_COMMAND_PERIPH      SYSCTL_PERIPH_GPIOJ	//E5
+#define LCD_COMMAND_BASE		GPIO_PORTJ_BASE
+
+#define LCD_RST_PERIPH          SYSCTL_PERIPH_GPIOF//E5
+#define LCD_RST_BASE            GPIO_PORTF_BASE
+#define LCD_RST_PIN             GPIO_PIN_0
+
+#define LCD_DC_RD_WR_PERIPH     SYSCTL_PERIPH_GPIOJ
+
+#define LCD_DC_BASE             GPIO_PORTJ_BASE			//e3
+#define LCD_DC_PIN              GPIO_PIN_1
+
+//#define LCD_RDBK_PERIPH			SYSCTL_PERIPH_GPIOD
+
+#define LCD_RD_BASE             GPIO_PORTJ_BASE		//E2 Pullup
+#define LCD_RD_PIN              GPIO_PIN_2
+
+#define LCD_WR_BASE             GPIO_PORTJ_BASE		//e1
+#define LCD_WR_PIN              GPIO_PIN_3
+
+#define LCD_CS_PERIPH           SYSCTL_PERIPH_GPIOJ		//d6
+#define LCD_CS_BASE             GPIO_PORTJ_BASE
+#define LCD_CS_PIN              GPIO_PIN_0
+
+#define LCD_BL_PERIPH           SYSCTL_PERIPH_GPIOD		//d6
+#define LCD_BL_BASE             GPIO_PORTD_BASE
+#define LCD_BL_PIN              GPIO_PIN_6
+
+#define LCD_BL_TIMER_PERIPH     SYSCTL_PERIPH_TIMER2
+#define LCD_BL_TIMER            TIMER_B
+#define LCD_BL_TIMER_BASE       TIMER2_BASE
+
 
 //some color definitions
 #define ClrAliceBlue            0x00F0F8FF

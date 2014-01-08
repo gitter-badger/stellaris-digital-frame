@@ -13,6 +13,8 @@
 #include "third_party/fatfs/src/diskio.h"
 #include "third_party/fatfs/src/ff.h"
 #include "third_party/fatfs/port/ssi_hw.h"
+#include "grlib/grlib.h"
+#include "lcd/LCDBP320x240x16_SSD1289.h"
 
 volatile unsigned int status=0, standby_active=0;
 volatile long on_time=0;
@@ -25,9 +27,6 @@ volatile unsigned long sec_time=0;
 //
 //*****************************************************************************
 static FATFS g_sFatFs;
-static DIR g_sDirObject;
-static FILINFO g_sFileInfo;
-static FIL g_sFileObject;
 //*****************************************************************************
 //
 // The number of SysTick ticks per second.
@@ -56,13 +55,14 @@ int main(void)
     int nStatus;
     FRESULT fresult;
     DRESULT res;
+    tContext sContext;
+    tRectangle sRect;
 
     //
     // Set the system clock to run at 50MHz from the PLL.
     //
     SysCtlClockSet(SYSCTL_SYSDIV_4 | SYSCTL_USE_PLL | SYSCTL_OSC_MAIN |
                        SYSCTL_XTAL_16MHZ);
-
     //
     // Configure SysTick for a 100Hz interrupt.
     //
@@ -77,13 +77,27 @@ int main(void)
     //
     IntMasterEnable();
 
+
+    // Init LCD
+    LCDBP320x240x16_SSD1289Init();
+
+    //Draw something
+
+    uINT_16 x0 = 10,x1 = 10,y0 = 10, y1 = 50;
+    for (x0 = 10; x0 < 50; x0++)
+    {
+    	LCDBPV2_LineDraw(x0,y0,x0,y1,ClrGreen);
+    }
+
+
+
+
+    return 0;
+
+
     //
     // Mount the file system, using logical disk 0.
     //
-    //fresult = f_mount(&g_sFatFs,"0:",1);
-    //BYTE writeval[512];
-	//BYTE readval[512];
-	//memset(writeval,0xA,512);
     res = disk_initialize(0);
 	fresult = f_mount(&g_sFatFs,"0:/",1);
 
@@ -93,8 +107,9 @@ int main(void)
         return(1);
     }
 
+
     FIL file;
-    fresult = f_open(&file,"0:/itay.txt", FA_WRITE);
+    fresult = f_open(&file,"0:/itay.txt", FA_WRITE | FA_CREATE_NEW);
     UINT btw = 1;
     UINT bw = 0;
     BYTE b = 0xAA;
