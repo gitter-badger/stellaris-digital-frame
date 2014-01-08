@@ -23,7 +23,7 @@
 <stringAttribute key="com.ti.ccstudio.debug.debugModel.ATTR_PROJECT.Stellaris In-Circuit Debug Interface_0/CORTEX_M3_0" value="Final"/>
 <stringAttribute key="com.ti.ccstudio.debug.debugModel.ATTR_TARGET_CONFIG" value="${target_config_active_default:Final}"/>
 <stringAttribute key="com.ti.ccstudio.debug.debugModel.MRU_PROGRAM.Cortex-M3 Device Cycle Accurate Simulator, Little Endian_0/ARMxx_0" value="C:/Users\Itay\workspace_v5_5\Final\Debug\Final.out"/>
-<stringAttribute key="com.ti.ccstudio.debug.debugModel.MRU_PROGRAM.Stellaris In-Circuit Debug Interface_0/CORTEX_M3_0" value="C:/Users\Itay\workspace_v5_5\Final\Debug\Final.out"/>
+<stringAttribute key="com.ti.ccstudio.debug.debugModel.MRU_PROGRAM.Stellaris In-Circuit Debug Interface_0/CORTEX_M3_0" value="C:/Projects\final\Debug\Final.out"/>
 <mapAttribute key="com.ti.ccstudio.debug.ui.displayFormats">
 <mapEntry key="Stellaris In-Circuit Debug Interface_0/CORTEX_M3_0@##separator##@0" value="32-Bit Hex - TI Style"/>
 </mapAttribute>

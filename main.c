@@ -84,9 +84,7 @@ int main(void)
     //BYTE writeval[512];
 	//BYTE readval[512];
 	//memset(writeval,0xA,512);
-
-	fresult = f_mount(&g_sFatFs,"0:/",1);
-	fresult = f_mkfs("0:/",0,512);
+    res = disk_initialize(0);
 	fresult = f_mount(&g_sFatFs,"0:/",1);
 
     //fresult = f_mkfs("0:",0,0);
@@ -96,8 +94,19 @@ int main(void)
     }
 
     FIL file;
-    fresult = f_open(&file,"0:/file1.txt",FA_CREATE_ALWAYS);
+    fresult = f_open(&file,"0:/itay.txt", FA_WRITE);
+    UINT btw = 1;
+    UINT bw = 0;
+    BYTE b = 0xAA;
 
-    fresult = f_open(&file,"0:/file2.txt",FA_CREATE_ALWAYS);
-    fresult = f_open(&file,"0:/file3.txt",FA_CREATE_ALWAYS);
+    fresult = f_write(&file,&b,btw,&bw);
+    fresult = f_close(&file);
+    fresult = f_open(&file,"0:/itay.txt",FA_READ);
+
+    UINT br;
+    b=0x00;
+    fresult = f_read(&file,&b,1,&br);
+
+    fresult = f_open(&file,"0:/itay1.txt",FA_OPEN_EXISTING);
+
 }
