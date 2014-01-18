@@ -1,4 +1,3 @@
-#define TARGET_IS_TEMPEST_RB1
 #include <string.h>
 #include "io.h"
 #include "inc/lm3s9b92.h"
@@ -77,51 +76,10 @@ int main(void)
     //
     IntMasterEnable();
 
-
     // Init LCD
     LCDBP320x240x16_SSD1289Init();
 
     //Draw something
 
-    uINT_16 x0 = 10,x1 = 10,y0 = 10, y1 = 50;
-    for (x0 = 10; x0 < 50; x0++)
-    {
-    	LCDBPV2_LineDraw(x0,y0,x0,y1,ClrGreen);
-    }
-
-
-
-
-    return 0;
-
-
-    //
-    // Mount the file system, using logical disk 0.
-    //
-    res = disk_initialize(0);
-	fresult = f_mount(&g_sFatFs,"0:/",1);
-
-    //fresult = f_mkfs("0:",0,0);
-    if(fresult != FR_OK)
-    {
-        return(1);
-    }
-
-
-    FIL file;
-    fresult = f_open(&file,"0:/itay.txt", FA_WRITE | FA_CREATE_NEW);
-    UINT btw = 1;
-    UINT bw = 0;
-    BYTE b = 0xAA;
-
-    fresult = f_write(&file,&b,btw,&bw);
-    fresult = f_close(&file);
-    fresult = f_open(&file,"0:/itay.txt",FA_READ);
-
-    UINT br;
-    b=0x00;
-    fresult = f_read(&file,&b,1,&br);
-
-    fresult = f_open(&file,"0:/itay1.txt",FA_OPEN_EXISTING);
 
 }

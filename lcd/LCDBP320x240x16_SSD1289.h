@@ -70,7 +70,6 @@ extern void LCDBPV2_StringDraw(const tFont *pFont,const uINT_8 *pcString, uINT_1
 extern const tDisplay g_sLCDBP320x240x16_SSD1289;
 
 
-
 //*****************************************************************************
 //
 // Defines for the pins that are used to communicate with the SSD1289.
@@ -93,7 +92,7 @@ extern const tDisplay g_sLCDBP320x240x16_SSD1289;
 #define LCD_DATAH_PERIPH        SYSCTL_PERIPH_GPIOE
 #define LCD_DATAH_BASE          GPIO_PORTE_BASE
 
-#define LCD_COMMAND_PERIPH      SYSCTL_PERIPH_GPIOJ	//E5
+#define LCD_COMMAND_PERIPH      SYSCTL_PERIPH_GPIOJ
 #define LCD_COMMAND_BASE		GPIO_PORTJ_BASE
 
 #define LCD_RST_PERIPH          SYSCTL_PERIPH_GPIOF//E5
