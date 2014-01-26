@@ -1,7 +1,7 @@
 stellaris-picture-viewer
 ========================
 
-This is an implementation for Stellaris LM3S9B92 evaluation board
+This is an implementation for Stellaris LM3S9B92 evaluation board.
 Can be ported to most of the Stellaris boards
 
 Featuring:
