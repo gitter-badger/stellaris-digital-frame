@@ -18,6 +18,7 @@
 #include "driverlib/timer.h"
 #include "grlib/grlib.h"
 #include "driverlib/i2c.h"
+#include "LCD_Backlight.h"
 #include "LCDBP320x240x16_SSD1289.h"
 
 //*****************************************************************************
@@ -261,9 +262,6 @@ void writeLow(uINT_8);
 void writeHigh(uINT_8);
 
 //void setxy(unsigned short int x,unsigned short  int y );
-void ConfigBK_I2C();
-void SetupI2C();
-void LCDBP320x240x16_SSD1289Backlight(int value);
 void Config();
 
 void LCD_init_periph(void)
@@ -291,11 +289,13 @@ void LCD_init_pins(void)
 	GPIOPinWrite(LCD_DATAH_BASE, 0xFF, 0x0);
 
 	//GPIO F: LCD_RST, LCD_BL
-	SysCtlPeripheralEnable(LCD_BL_PERIPH);
-	GPIOPinTypeGPIOOutput(LCD_BL_BASE, LCD_BL_PIN); //TS_DI = input
+
+	//SysCtlPeripheralEnable(LCD_BL_PERIPH);
+	//GPIOPinTypeGPIOOutput(LCD_BL_BASE, LCD_BL_PIN); //TS_DI = input
 
 	SysCtlPeripheralEnable(LCD_RST_PERIPH);
 	GPIOPinTypeGPIOOutput(LCD_RST_BASE, LCD_RST_PIN);
+	GPIOPinWrite(LCD_RST_BASE, LCD_RST_PIN, 0); // RST = 1
 	GPIOPinWrite(LCD_RST_BASE, LCD_RST_PIN, LCD_RST_PIN); // RST = 1
 
 	//Commands
@@ -550,6 +550,8 @@ void LCDBP320x240x16_SSD1289Init(void)
 	LCD_init_periph();
 
 	LCD_init_pins();
+
+	initLCDBacklight();
 
 	init1();
 

@@ -25,7 +25,7 @@ volatile unsigned long sec_time=0;
 // The following are data structures used by FatFs.
 //
 //*****************************************************************************
-static FATFS g_sFatFs;
+static FATFS fs;
 //*****************************************************************************
 //
 // The number of SysTick ticks per second.
@@ -75,6 +75,15 @@ int main(void)
     // Enable Interrupts
     //
     IntMasterEnable();
+
+    // Mount fs
+
+    fresult = f_mount(&fs,"0:",0);
+    FIL file1;
+    fresult = f_open(&file1,"0:/test.txt",FA_CREATE_ALWAYS);
+    fresult = f_close(&file1);
+    fresult = f_open(&file1,"0:/test.txt",FA_OPEN_EXISTING);
+    fresult = f_open(&file1,"0:/test1.txt",FA_OPEN_EXISTING);
 
     // Init LCD
     LCDBP320x240x16_SSD1289Init();

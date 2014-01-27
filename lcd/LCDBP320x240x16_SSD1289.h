@@ -116,14 +116,6 @@ extern const tDisplay g_sLCDBP320x240x16_SSD1289;
 #define LCD_CS_BASE             GPIO_PORTJ_BASE
 #define LCD_CS_PIN              GPIO_PIN_0
 
-#define LCD_BL_PERIPH           SYSCTL_PERIPH_GPIOD		//d6
-#define LCD_BL_BASE             GPIO_PORTD_BASE
-#define LCD_BL_PIN              GPIO_PIN_6
-
-#define LCD_BL_TIMER_PERIPH     SYSCTL_PERIPH_TIMER2
-#define LCD_BL_TIMER            TIMER_B
-#define LCD_BL_TIMER_BASE       TIMER2_BASE
-
 
 //some color definitions
 #define ClrAliceBlue            0x00F0F8FF
