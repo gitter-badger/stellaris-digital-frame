@@ -13,12 +13,11 @@
 #include "third_party/fatfs/src/ff.h"
 #include "third_party/fatfs/port/ssi_hw.h"
 #include "grlib/grlib.h"
-#include "lcd/LCDBP320x240x16_SSD1289.h"
+#include "lcd/grlibDriver.h"
 
-volatile unsigned int status=0, standby_active=0;
-volatile long on_time=0;
-volatile unsigned long sec_time=0;
-
+volatile unsigned int status = 0, standby_active = 0;
+volatile long on_time = 0;
+volatile unsigned long sec_time = 0;
 
 //*****************************************************************************
 //
@@ -33,68 +32,77 @@ static FATFS fs;
 //*****************************************************************************
 #define TICKS_PER_SECOND 100
 
-
 //*****************************************************************************
 //
 // This is the handler for this SysTick interrupt.  FatFs requires a
 // timer tick every 10 ms for internal timing purposes.
 //
 //*****************************************************************************
-void
-SysTickHandler(void)
+void SysTickHandler(void)
 {
-    //
-    // Call the FatFs tick timer.
-    //
-    disk_timerproc();
+	//
+	// Call the FatFs tick timer.
+	//
+	disk_timerproc();
 }
 
 int main(void)
 {
-    int nStatus;
-    FRESULT fresult;
-    DRESULT res;
-    tContext sContext;
-    tRectangle sRect;
 
-    //
-    // Set the system clock to run at 50MHz from the PLL.
-    //
-    SysCtlClockSet(SYSCTL_SYSDIV_4 | SYSCTL_USE_PLL | SYSCTL_OSC_MAIN |
-                       SYSCTL_XTAL_16MHZ);
-    //
-    // Configure SysTick for a 100Hz interrupt.
-    //
-    SysTickPeriodSet(SysCtlClockGet() / TICKS_PER_SECOND);
-    SysTickEnable();
-    SysTickIntEnable();
-    long systickPeriod = SysTickPeriodGet();
-    long sysCtlClk = SysCtlClockGet();
+	FRESULT fresult;
 
-    //
-    // Enable Interrupts
-    //
-    IntMasterEnable();
+	//
+	// Set the system clock to run at 50MHz from the PLL.
+	//
+	SysCtlClockSet(
+			SYSCTL_SYSDIV_4 | SYSCTL_USE_PLL | SYSCTL_OSC_MAIN
+					| SYSCTL_XTAL_16MHZ);
+	//
+	// Configure SysTick for a 100Hz interrupt.
+	//
+	SysTickPeriodSet(SysCtlClockGet() / TICKS_PER_SECOND);
+	SysTickEnable();
+	SysTickIntEnable();
+	long systickPeriod = SysTickPeriodGet();
+	long sysCtlClk = SysCtlClockGet();
 
-    // Mount fs
+	//
+	// Enable Interrupts
+	//
+	IntMasterEnable();
 
-    fresult = f_mount(&fs,"0:",0);
-    FIL file1;
-    fresult = f_open(&file1,"0:/test.txt",FA_CREATE_ALWAYS);
-    printf("Created file with %d",fresult);
-    fresult = f_close(&file1);
-    fresult = f_open(&file1,"0:/test.txt",FA_OPEN_EXISTING);
-    printf("Opened file with %d",fresult);
-    fresult = f_open(&file1,"0:/test1.txt",FA_OPEN_EXISTING);
+	// Mount fs
+	fresult = f_mount(&fs, "0:", 0);
 
-    // Init LCD
-    LCDBP320x240x16_SSD1289Init();
+	// Init LCD
+	ssd1289_init();
 
-    //Draw something
-    int i = 0;
-    for(i=0; i<200; i++) {
-    	LCDBPV2_LineDrawV(i,0,200,ClrCoral);
-    }
+	//Draw something
+	tContext sContext;
+	const tDisplay* pDisplay = &DisplayStructure;
+	GrContextInit(&sContext, pDisplay);
+	tRectangle sRect;
+	//
+	// Fill the top 24 rows of the screen with blue to create the banner.
+	//
+	sRect.sXMin = 0;
+	sRect.sYMin = 0;
+	sRect.sXMax = GrContextDpyWidthGet(&sContext) - 1;
+	sRect.sYMax = 23;
+	GrContextForegroundSet(&sContext, ClrDarkBlue);
+	GrRectFill(&sContext, &sRect);
 
+	//
+	// Put a white box around the banner.
+	//
+	GrContextForegroundSet(&sContext, ClrWhite);
+	GrRectDraw(&sContext, &sRect);
+
+	//
+	// Put the application name in the middle of the banner.
+	//
+	GrContextFontSet(&sContext, g_pFontCm20);
+	GrStringDrawCentered(&sContext, "17:54 17/2/2014", -1,
+			GrContextDpyWidthGet(&sContext) / 2, 8, 0);
 
 }

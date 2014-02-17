@@ -162,8 +162,7 @@ void send_initial_clock_train(void)
 /* When the target system does not support socket power control, there   */
 /* is nothing to do in these functions and chk_power always returns 1.   */
 
-static
-void power_on(void)
+static void power_on(void)
 {
 	/*
 	 * This doesn't really turn the power on, but initializes the
