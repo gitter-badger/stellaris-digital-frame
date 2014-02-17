@@ -81,14 +81,20 @@ int main(void)
     fresult = f_mount(&fs,"0:",0);
     FIL file1;
     fresult = f_open(&file1,"0:/test.txt",FA_CREATE_ALWAYS);
+    printf("Created file with %d",fresult);
     fresult = f_close(&file1);
     fresult = f_open(&file1,"0:/test.txt",FA_OPEN_EXISTING);
+    printf("Opened file with %d",fresult);
     fresult = f_open(&file1,"0:/test1.txt",FA_OPEN_EXISTING);
 
     // Init LCD
     LCDBP320x240x16_SSD1289Init();
 
     //Draw something
+    int i = 0;
+    for(i=0; i<200; i++) {
+    	LCDBPV2_LineDrawV(i,0,200,ClrCoral);
+    }
 
 
 }

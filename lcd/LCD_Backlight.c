@@ -20,6 +20,8 @@
 #include "driverlib/i2c.h"
 #include "LCD_Backlight.h"
 
+static int BL_Period;
+static int BL_Duty;
 
 //Inits and sets to 50%
 void initLCDBacklight()
@@ -29,11 +31,32 @@ void initLCDBacklight()
     SysCtlPeripheralEnable(LCD_BL_PERIPH);
 
     GPIOPinTypePWM(LCD_BL_BASE, GPIO_PIN_1);
+    // PWMGenConfigure(LCD_BL_BASE, PWM_GEN_1,PWM_GEN_MODE_DOWN | PWM_GEN_MODE_NO_SYNC);
+    BL_Period = 400;
+    PWMGenPeriodSet(LCD_BL_BASE, PWM_GEN_1, BL_Period);
+    PWMPulseWidthSet(LCD_BL_BASE,PWM_OUT_1,100);
+    PWMOutputState(LCD_BL_BASE,PWM_OUT_1_BIT,true);
+    setBacklight(50);
 
 }
 
 //returns int from 0 to 100
-int getBacklightValue();
+int getBacklightValue() {
+
+}
 
 //Value from 0 to 100
-void setBacklight(int value);
+void setBacklight(int value) {
+	if (value > 100) {
+		value = 100;
+	}
+	if (value < 1) {
+		value = 1;
+	}
+
+	BL_Duty = value;
+	int dutyPeriod = BL_Period * value / 100;
+	PWMPulseWidthSet(LCD_BL_BASE,PWM_OUT_1,dutyPeriod);
+
+
+}

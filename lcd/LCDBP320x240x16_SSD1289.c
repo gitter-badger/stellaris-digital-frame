@@ -295,7 +295,6 @@ void LCD_init_pins(void)
 
 	SysCtlPeripheralEnable(LCD_RST_PERIPH);
 	GPIOPinTypeGPIOOutput(LCD_RST_BASE, LCD_RST_PIN);
-	GPIOPinWrite(LCD_RST_BASE, LCD_RST_PIN, 0); // RST = 1
 	GPIOPinWrite(LCD_RST_BASE, LCD_RST_PIN, LCD_RST_PIN); // RST = 1
 
 	//Commands
@@ -503,7 +502,7 @@ void init1()
 	GPIOPinWrite(LCD_DATAL_BASE, 0xff, 0x00);
 	SysCtlDelay(100);
 
-	GPIOPinWrite(LCD_DC_BASE, (LCD_DC_PIN | LCD_WR_PIN), (LCD_WR_PIN)); //GPIOPinWrite(LCD_DC_BASE, (LCD_DC_PIN | LCD_RD_PIN | LCD_WR_PIN),(LCD_RD_PIN | LCD_WR_PIN));
+	GPIOPinWrite(LCD_COMMAND_BASE, (LCD_DC_PIN | LCD_WR_PIN), (LCD_WR_PIN)); //GPIOPinWrite(LCD_DC_BASE, (LCD_DC_PIN | LCD_RD_PIN | LCD_WR_PIN),(LCD_RD_PIN | LCD_WR_PIN));
 	GPIOPinWrite(LCD_RST_BASE, LCD_RST_PIN, 0x00);
 
 	//
@@ -648,24 +647,24 @@ void LCDBP320x240x16_SSD1289Init(void)
 	WriteCommand(SSD1289_RAM_DATA_REG);
 	WriteDataSec(0x00, 76800);
 
-//    for(ulCount = 0; ulCount < (76800); ulCount++) //320*240=76800
-//    {
-//        WriteData(ulCount);
-//
-//    }
-//    SysCtlDelay(1000000);
+    for(ulCount = 0; ulCount < (76800); ulCount++) //320*240=76800
+    {
+        WriteData(ulCount);
 
-	//WriteCommand(SSD1289_RAM_DATA_REG);
-	//WriteData(0x0);
-	//WriteDataSec(0x777, 36800);
+    }
+  SysCtlDelay(1000000);
 
-	/*    SysCtlDelay(10000000);
+	WriteCommand(SSD1289_RAM_DATA_REG);
+	WriteData(0x0);
+	WriteDataSec(0x777, 36800);
+
+	SysCtlDelay(10000000);
 	 WriteCommand(SSD1289_RAM_DATA_REG);
 	 WriteDataSec(0x700, 76800);
 	 SysCtlDelay(10000000);
 	 WriteCommand(SSD1289_RAM_DATA_REG);
 	 WriteDataSec(0x500, 76800);
-	 SysCtlDelay(10000000);*/
+	 SysCtlDelay(10000000);
 
 }
 
