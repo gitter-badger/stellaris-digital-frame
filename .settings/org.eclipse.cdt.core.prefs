@@ -1,7 +1,7 @@
 eclipse.preferences.version=1
 environment/project/com.ti.ccstudio.buildDefinitions.TMS470.Debug.993091257/SW_ROOT/delimiter=;
 environment/project/com.ti.ccstudio.buildDefinitions.TMS470.Debug.993091257/SW_ROOT/operation=replace
-environment/project/com.ti.ccstudio.buildDefinitions.TMS470.Debug.993091257/SW_ROOT/value=c\:\\ti\\StellarisWare
+environment/project/com.ti.ccstudio.buildDefinitions.TMS470.Debug.993091257/SW_ROOT/value=d\:\\ti\\StellarisWare
 environment/project/com.ti.ccstudio.buildDefinitions.TMS470.Debug.993091257/append=true
 environment/project/com.ti.ccstudio.buildDefinitions.TMS470.Debug.993091257/appendContributed=true
 environment/project/com.ti.ccstudio.buildDefinitions.TMS470.Release.70514163/SW_ROOT/delimiter=;

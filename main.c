@@ -14,6 +14,7 @@
 #include "third_party/fatfs/port/ssi_hw.h"
 #include "grlib/grlib.h"
 #include "lcd/grlibDriver.h"
+#include "touch/xpt2046.h"
 
 volatile unsigned int status = 0, standby_active = 0;
 volatile long on_time = 0;
@@ -46,6 +47,7 @@ void SysTickHandler(void)
 	disk_timerproc();
 }
 
+
 int main(void)
 {
 
@@ -77,6 +79,10 @@ int main(void)
 	// Init LCD
 	ssd1289_init();
 
+	// Init touch
+	xpt2046_init();
+	xpt2046_EnableTouchIRQ();
+	xpt2046_TouchScreenCallbackSet(0);
 	//Draw something
 	tContext sContext;
 	const tDisplay* pDisplay = &DisplayStructure;
