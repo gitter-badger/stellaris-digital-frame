@@ -15,6 +15,7 @@
 #include "grlib/grlib.h"
 #include "lcd/grlibDriver.h"
 #include "touch/xpt2046.h"
+#include "rtc/rtc.h"
 
 volatile unsigned int status = 0, standby_active = 0;
 volatile long on_time = 0;
@@ -47,6 +48,11 @@ void SysTickHandler(void)
 	disk_timerproc();
 }
 
+long touchScreenCallback(unsigned long message, long x,long y){
+
+	printf("Touched x: %d, y: %d",x,y);
+}
+
 
 int main(void)
 {
@@ -68,21 +74,20 @@ int main(void)
 	long systickPeriod = SysTickPeriodGet();
 	long sysCtlClk = SysCtlClockGet();
 
-	//
-	// Enable Interrupts
-	//
-	IntMasterEnable();
+	rtc_init();
+
 
 	// Mount fs
 	fresult = f_mount(&fs, "0:", 0);
 
+	// Init touch
+	xpt2046_init();
+	xpt2046_setTouchScreenCallback(touchScreenCallback);
+
+
 	// Init LCD
 	ssd1289_init();
 
-	// Init touch
-	xpt2046_init();
-	xpt2046_EnableTouchIRQ();
-	xpt2046_TouchScreenCallbackSet(0);
 	//Draw something
 	tContext sContext;
 	const tDisplay* pDisplay = &DisplayStructure;
@@ -111,4 +116,5 @@ int main(void)
 	GrStringDrawCentered(&sContext, "17:54 17/2/2014", -1,
 			GrContextDpyWidthGet(&sContext) / 2, 8, 0);
 
+	while (true);
 }
