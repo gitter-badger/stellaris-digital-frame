@@ -4,9 +4,9 @@
 
 //----- DEFINES -----
 //Application settings
-#define VERSION                        "0.14"
+#define VERSION                        "v0.1"
 #define RELEASE                        //Release version
-#define APPNAME                        "PictureViewer" //max 15 characters
+#define APPLICATION_NAME               "Picture Viewer" //max 15 characters
 
 
 //Max characters

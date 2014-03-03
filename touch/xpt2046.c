@@ -5,6 +5,8 @@
  *      Author: Itay
  */
 
+
+#include "driverlib/pin_map.h"
 #include "inc/hw_memmap.h"
 #include "inc/hw_types.h"
 #include "inc/hw_ints.h"
@@ -17,21 +19,24 @@
 
 #include "xpt2046.h"
 
-float mx = 0.1364;
-float bx = -18.8864;
-float my = 0.1810;
-float by = -21.8100;
-
 static long (*g_pfnTSHandler)(unsigned long ulMessage, long lX, long lY);
+
+double cal_x = (double)SCREEN_WIDTH / (double)TOUCH_X1;
+double cal_y = (double)SCREEN_HIEGHT / (double)TOUCH_Y1;
+
+unsigned char xpt2046_readIRQ()
+{
+	return GPIOPinRead(TOUCH_IRQ_BASE,TOUCH_IRQ_PIN);
+}
 
 void xpt2046_select()
 {
-	GPIOPinWrite(TOUCH_SPI_PORT_BASE, TOUCH_CS_PIN, 0);
+	GPIOPinWrite(TOUCH_GPIO_PORT_BASE, TOUCH_CS_PIN, 0);
 }
 
 void xpt2046_deselect()
 {
-	GPIOPinWrite(TOUCH_SPI_PORT_BASE, TOUCH_CS_PIN, TOUCH_CS_PIN);
+	GPIOPinWrite(TOUCH_GPIO_PORT_BASE, TOUCH_CS_PIN, TOUCH_CS_PIN);
 }
 
 //write data to XPT2046 (same as ADS7843)
@@ -42,16 +47,27 @@ static unsigned char xpt2046_sendCommand(unsigned char cmd)
 
 	SSIDataGet(TOUCH_SPI_PORT_BASE, &dataToRead);
 
-	if (dataToRead) printf("GOT DATA DIFF FROM ZERO: %d !!!",dataToRead);
 	return dataToRead;
 }
 
-//(same as ADS7843) Return a byte of data
-static unsigned char xpt2046_readByte()
+unsigned int _xpt2046_get_reading( unsigned char control )
 {
-	unsigned char result;
-	result = xpt2046_sendCommand(0x0A);
-	return result;
+	xpt2046_select();
+
+	unsigned char rData[3] = { 0 , 0 , 0 };
+
+	rData[0] = xpt2046_sendCommand(control);
+	rData[1] = xpt2046_sendCommand(0);
+	rData[2] = xpt2046_sendCommand(0);
+
+
+	xpt2046_deselect();
+
+	if ( ( control & 0x08 ) == 0 ) {
+		return ( rData[1] << 5 ) | ( rData[2] >> 3 );
+	}
+	return ( rData[1] << 4 ) | ( rData[2] >> 4 );
+
 }
 
 void xpt2046_init()
@@ -69,91 +85,116 @@ void xpt2046_init()
 	// turn weak pull-ups on
 	GPIOPadConfigSet(TOUCH_IRQ_BASE, TOUCH_IRQ_PIN, GPIO_STRENGTH_2MA,
 			GPIO_PIN_TYPE_STD_WPU);
-	GPIOIntTypeSet(TOUCH_IRQ_BASE, TOUCH_IRQ_PIN, GPIO_FALLING_EDGE);
+	GPIOIntTypeSet(TOUCH_IRQ_BASE, TOUCH_IRQ_PIN, GPIO_LOW_LEVEL);
 	IntEnable(TOUCH_IRQ_INT);
-	GPIOPinIntEnable(TOUCH_IRQ_BASE, TOUCH_IRQ_PIN);
-
-	//
-	// Enable Interrupts
-	//
-	IntMasterEnable();
-
-	GPIOPinTypeGPIOOutput(TOUCH_SPI_PORT_BASE, TOUCH_CS_PIN);
-	xpt2046_deselect();
 
 	/*
 	 * Configure the appropriate pins to be SSI instead of GPIO. The CS
 	 * signal is directly driven.
 	 */
-
-
+	GPIOPinConfigure(GPIO_PF2_SSI1CLK);
+	GPIOPinConfigure(GPIO_PF4_SSI1RX);
+	GPIOPinConfigure(GPIO_PF5_SSI1TX);
+	GPIOPinTypeSSI(TOUCH_GPIO_PORT_BASE,
+			TOUCH_MISO_PIN | TOUCH_MOSI_PIN | TOUCH_CLK_PIN);
+	GPIOPinTypeGPIOOutput(TOUCH_GPIO_PORT_BASE, TOUCH_CS_PIN);
 	GPIOPadConfigSet(TOUCH_GPIO_PORT_BASE, TOUCH_MISO_PIN, GPIO_STRENGTH_4MA,
 			GPIO_PIN_TYPE_STD_WPU);
 	GPIOPadConfigSet(TOUCH_GPIO_PORT_BASE,
 			TOUCH_CS_PIN | TOUCH_MOSI_PIN | TOUCH_CLK_PIN, GPIO_STRENGTH_4MA,
 			GPIO_PIN_TYPE_STD);
-	GPIOPinTypeSSI(TOUCH_GPIO_PORT_BASE,
-				TOUCH_MISO_PIN | TOUCH_MOSI_PIN | TOUCH_CLK_PIN);
+
+	// Deassert CS pin for touch
+	xpt2046_deselect();
+	SysCtlDelay(10);
 
 	/* Configure the SPI port */
-	SSIConfigSetExpClk(TOUCH_SPI_PORT_BASE, SysCtlClockGet(),
-			SSI_FRF_MOTO_MODE_0, SSI_MODE_MASTER, 200000, 8);
+	SSIConfigSetExpClk(TOUCH_SPI_PORT_BASE, SysCtlClockGet(), SSI_FRF_MOTO_MODE_0,
+			SSI_MODE_MASTER, 200000, 8);
 	SSIEnable(TOUCH_SPI_PORT_BASE);
 
+	// Make a dummy read just so IRQ will be active
 	xpt2046_select();
-//	 Make a dummy read just so IRQ will be active
-	xpt2046_sendCommand(0x90);
-	unsigned char read;
-	read = xpt2046_readByte();
-	read = xpt2046_readByte();
 
+	_xpt2046_get_reading(0x90);
+
+	xpt2046_deselect();
+
+	//
+	// Enable Interrupts
+	//
+	IntMasterEnable();
 }
 
-void read_touch_ADC(unsigned short int* x, unsigned short int* y)
+void xpt2046GetCoordinates(unsigned int * pX, unsigned int * pY)
 {
-	unsigned long delay_1us;
-	delay_1us = SysCtlClockGet() / 3000000;
-	unsigned char data_x[] =
-	{ 0xD0, 0x00, 0x00 };
-	unsigned char data_y[] =
-	{ 0x90, 0x00, 0x00 };
-	// Send 'read x' command and read 2 bytes
-	xpt2046_sendCommand(data_x[0]);
-	SysCtlDelay(delay_1us * 2);
-	data_x[1] = xpt2046_readByte();
-	data_x[2] = xpt2046_readByte();
-	SysCtlDelay(delay_1us * 2);
-	xpt2046_sendCommand(data_y[0]);
-	SysCtlDelay(delay_1us * 2);
-	data_y[1] = xpt2046_readByte();
-	data_y[2] = xpt2046_readByte();
+	int i;
+	unsigned int allX[ 7 ] , allY[ 7 ];
+	_xpt2046_get_reading( CHX );
+	_xpt2046_get_reading( CHY );
+	for ( i = 0 ; i < 7 ; i ++ ) {
+		allX[ i ] = _xpt2046_get_reading( CHX );
+		allY[ i ] = _xpt2046_get_reading( CHY );
+	}
 
-	*x = data_x[1];
-	*x = ((*x) << 8) + data_x[2];
-	*x >>= 4;
-	*y = data_y[1];
-	*y = ((*y) << 8) + data_y[2];
-	*y >>= 4;
-	printf("X %d Y %d\n", *x, *y);
+	int j;
+	for ( i = 0 ; i < 4 ; i ++ ) {
+		for ( j = i ; j < 7 ; j ++ ) {
+			int temp = allX[ i ];
+			if ( temp > allX[ j ] ) {
+				allX[ i ] = allX[ j ];
+				allX[ j ] = temp;
+			}
+			temp = allY[ i ];
+			if ( temp > allY[ j ] ) {
+				allY[ i ] = allY[ j ];
+				allY[ j ] = temp;
+			}
+		}
+	}
+	_xpt2046_get_reading( CHX );
+
+	*pX = allX[ 3 ];
+	*pY = allY[ 3 ];
 }
 
-void convert_ADC_to_xy(unsigned short int adc_x, unsigned short int adc_y,
-		unsigned short int* px_x, unsigned short int* px_y)
+unsigned char xpt2046GetAverageCoordinates(unsigned int * pX , unsigned int * pY , int nSamples )
 {
+	int nRead = 0;
+	unsigned int xAcc = 0 , yAcc = 0;
+	unsigned int x , y;
 
-	*px_x = (mx * (float) adc_x + bx);
-	*px_y = (my * (float) adc_y + by);
-}
+	x = 0;
+	y = 0;
+	while ( nRead < nSamples ) {
+		// data no longer available
+		if (xpt2046_readIRQ())
+			return 0;
 
-int xpt2046_getTouchPosition(unsigned short int* x, unsigned short int* y)
-{
-	unsigned short int adc_x, adc_y;
-	read_touch_ADC(&adc_x, &adc_y);
-	convert_ADC_to_xy(adc_x, adc_y, x, y);
-	if (adc_x == 0 | adc_y == 0)
-		return 0;
-	else
+		xpt2046GetCoordinates(&x , &y);
+
+		xAcc += x;
+		yAcc += y;
+		nRead ++;
+
+
+		// sprintf(buf, "Added: %u %u (%d)", x, y, nRead);
+		// SendUARTStr(buf);
+
+		// no more data available
+		if (xpt2046_readIRQ()) break;
+	}
+
+	if (nRead >= 3)
+	{
+		*pX = xAcc / nRead;
+		*pY = yAcc / nRead;
+
 		return 1;
+	}
+	else
+		// too few samples collected, ignore
+		return 0;
 }
 
 void xpt2046_clearIRQ()
@@ -164,10 +205,9 @@ void xpt2046_clearIRQ()
 void TouchScreenIntHandler()
 {
 	xpt2046_clearIRQ();
-
 	//Do your thing
-	unsigned short x = 0, y = 0;
-	if (xpt2046_getTouchPosition(&x, &y) == 1)
+	unsigned int x = 0, y = 0;
+	if (touch_GetCoordinates(&x, &y) == 1)
 	{
 		if (g_pfnTSHandler)
 		{
@@ -177,9 +217,34 @@ void TouchScreenIntHandler()
 			//
 			g_pfnTSHandler(WIDGET_MSG_PTR_DOWN, x, y);
 			g_pfnTSHandler(WIDGET_MSG_PTR_UP, x, y);
+
+			printf("Touched x: %d, y: %d\n",x,y);
 		}
 	}
+	printf("Interrupt called\n");
 
+	// Block while pressed
+	while(xpt2046_readIRQ() == 0);
+
+
+	return;
+}
+
+unsigned char touch_GetCoordinates(unsigned int * pX, unsigned int * pY)
+{
+	// get the raw touch coordinates
+	unsigned int tX = 0;
+	unsigned int tY = 0;
+	unsigned char isOK = xpt2046GetAverageCoordinates(&tX, &tY, NUM_OF_SAMPLES);
+
+	// convert to LCD coordinates
+	if (isOK)
+	{
+		*pX = (tX - TOUCH_X0) * cal_x;
+		*pY = (tY - TOUCH_Y0) * cal_y;
+	}
+
+	return isOK;
 }
 
 void xpt2046_setTouchScreenCallback(

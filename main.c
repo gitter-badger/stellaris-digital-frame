@@ -17,6 +17,8 @@
 #include "touch/xpt2046.h"
 #include "rtc/rtc.h"
 
+#include "main.h"
+
 volatile unsigned int status = 0, standby_active = 0;
 volatile long on_time = 0;
 volatile unsigned long sec_time = 0;
@@ -48,15 +50,13 @@ void SysTickHandler(void)
 	disk_timerproc();
 }
 
-long touchScreenCallback(unsigned long message, long x,long y){
+long touchScreenCallback(unsigned long message, long x, long y)
+{
 
-	printf("Touched x: %d, y: %d",x,y);
 }
-
 
 int main(void)
 {
-
 	FRESULT fresult;
 
 	//
@@ -76,17 +76,15 @@ int main(void)
 
 	rtc_init();
 
-
 	// Mount fs
 	fresult = f_mount(&fs, "0:", 0);
+
+	// Init LCD
+	ssd1289_init();
 
 	// Init touch
 	xpt2046_init();
 	xpt2046_setTouchScreenCallback(touchScreenCallback);
-
-
-	// Init LCD
-	ssd1289_init();
 
 	//Draw something
 	tContext sContext;
@@ -113,8 +111,22 @@ int main(void)
 	// Put the application name in the middle of the banner.
 	//
 	GrContextFontSet(&sContext, g_pFontCm20);
-	GrStringDrawCentered(&sContext, "17:54 17/2/2014", -1,
+	GrStringDrawCentered(&sContext, APPLICATION_NAME, -1,
 			GrContextDpyWidthGet(&sContext) / 2, 8, 0);
+	char * str;
+	if (fresult == FR_OK)
+		str = "Filesystem OK";
+	else
+		str = "Filesystem ERROR";
+	GrStringDrawCentered(&sContext, str, -1,
+				GrContextDpyWidthGet(&sContext) / 2, 32, 0);
+	xpt2046_enableTouchIRQ();
 
-	while (true);
+	while (true)
+	{
+		unsigned int x, y;
+		//if (touch_GetCoordinates(&x,&y))
+		//printf("Touched x: %d, y: %d\n",x,y);
+	}
+
 }

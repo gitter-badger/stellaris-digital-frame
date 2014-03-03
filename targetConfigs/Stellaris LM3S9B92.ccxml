@@ -15,6 +15,7 @@
     
 
     
+
 <configuration XML_version="1.2" id="Stellaris In-Circuit Debug Interface_0">
         <instance XML_version="1.2" desc="Stellaris In-Circuit Debug Interface_0" href="connections/Stellaris_ICDI_Connection.xml" id="Stellaris In-Circuit Debug Interface_0" xml="Stellaris_ICDI_Connection.xml" xmlpath="connections"/>
         <connection XML_version="1.2" id="Stellaris In-Circuit Debug Interface_0">

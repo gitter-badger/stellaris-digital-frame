@@ -24,17 +24,22 @@
 #define TOUCH_IRQ_BASE			GPIO_PORTG_BASE
 #define TOUCH_IRQ_PIN			GPIO_PIN_0
 
-typedef	struct POINT
-{
-   unsigned int x;
-   unsigned int y;
+// Maximum and minimum readings
+#define TOUCH_X0 200
+#define TOUCH_Y0 200
+#define TOUCH_X1 3700
+#define TOUCH_Y1 3700
 
-}  Coordinate;
+// Configure screen size
+#define SCREEN_WIDTH 320
+#define SCREEN_HIEGHT 240
 
+// Number of samples
+#define NUM_OF_SAMPLES 10
 
 /* AD channel selection command and register */
-#define	CHX 	0xD0 	/* channel Y+ selection command */
-#define	CHY 	0x90	/* channel X+ selection command*/
+#define	CHX 	0x90 	/* channel Y+ selection command */
+#define	CHY 	0xD0	/* channel X+ selection command*/
 
 
 void xpt2046_init();
@@ -42,6 +47,6 @@ void xpt2046_enableTouchIRQ();
 void xpt2046_disableTouchIRQ();
 extern void TouchScreenIntHandler();
 void xpt2046_setTouchScreenCallback(
-		long (*pfnCallback)(unsigned long ulMessage, long lX, long lY));
-int xpt2046_getTouchPosition(unsigned short int* x, unsigned short int* y);
+long (*pfnCallback)(unsigned long ulMessage, long lX, long lY));
+unsigned char touch_GetCoordinates(unsigned int* x, unsigned int* y);
 #endif /* XPT2046_H_ */
