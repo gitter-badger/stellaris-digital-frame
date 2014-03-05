@@ -81,7 +81,6 @@ void xpt2046_init()
 	SysCtlDelay(10);
 
 	/* Set IRQ stuff */
-
 	// turn weak pull-ups on
 	GPIOPadConfigSet(TOUCH_IRQ_BASE, TOUCH_IRQ_PIN, GPIO_STRENGTH_2MA,
 			GPIO_PIN_TYPE_STD_WPU);
@@ -205,6 +204,7 @@ void xpt2046_clearIRQ()
 void TouchScreenIntHandler()
 {
 	xpt2046_clearIRQ();
+	xpt2046_disableTouchIRQ();
 	//Do your thing
 	unsigned int x = 0, y = 0;
 	if (touch_GetCoordinates(&x, &y) == 1)
@@ -226,7 +226,7 @@ void TouchScreenIntHandler()
 	// Block while pressed
 	while(xpt2046_readIRQ() == 0);
 
-
+	xpt2046_enableTouchIRQ();
 	return;
 }
 
