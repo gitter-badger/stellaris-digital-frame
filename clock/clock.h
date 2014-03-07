@@ -10,13 +10,14 @@
 
 #include "grlib/grlib.h"
 #include "grlib/widget.h"
+#include "grlib/canvas.h"
 
 
-extern tWidget clockWidget;
+extern tCanvasWidget clockWidget;
 
-void initClock(tContext*, tDisplay*);
-void updateClock(tContext*, tDisplay*);
-void removeClock(tContext*, tDisplay*);
+void initClock(tContext*,const tDisplay*);
+void updateClock();
+void removeClock();
 
 
 #endif /* CLOCK_H_ */

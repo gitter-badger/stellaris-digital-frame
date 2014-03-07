@@ -5,7 +5,7 @@
  *      Author: Itay
  */
 
-
+#include <stdio.h>
 #include "driverlib/pin_map.h"
 #include "inc/hw_memmap.h"
 #include "inc/hw_types.h"

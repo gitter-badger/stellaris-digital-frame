@@ -8,6 +8,8 @@
 #ifndef RTC_H_
 #define RTC_H_
 
+#include <stdint.h>
+
 #define RTC_SPI_PORT_BASE   	SSI1_BASE
 #define RTC_SPI_PERIPH   		SYSCTL_PERIPH_SSI1
 
@@ -23,8 +25,6 @@
 #define RTC_CS_PIN				GPIO_PIN_1
 
 void rtc_init();
-//char rtc_setDatetime(DateTime_t datetime);
-//char rtc_getDatetime(DateTime_t *datetime);
 
 //Please consult DS3234's datasheet on meaning and proper usage of these constants
 #define DS3234_ALARM1_ONCE_PER_SECOND 0x0F

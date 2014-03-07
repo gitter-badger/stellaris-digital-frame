@@ -192,10 +192,12 @@ NmiSR(void)
 static void
 FaultISR(void)
 {
+	printf("FALUT ISR was called\n");
     //
     // Enter an infinite loop.
     //
-    while(1)
+	int nTest = 1;
+    while(nTest)
     {
     }
 }

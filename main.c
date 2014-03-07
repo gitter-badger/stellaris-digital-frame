@@ -1,5 +1,5 @@
 #include <string.h>
-#include "io.h"
+
 #include "inc/lm3s9b92.h"
 #include "driverlib/rom.h"
 #include "inc/hw_memmap.h"
@@ -20,7 +20,7 @@
 #include "rtc/rtc.h"
 #include "bmp/bmpdisplay.h"
 #include "bmp/bmpfile.h"
-
+#include "clock/clock.h"
 #include "main.h"
 
 volatile unsigned int status = 0, standby_active = 0;
@@ -131,19 +131,12 @@ const unsigned char g_pucBlue50x50Press[] =
 		0xe2, 0x45, 0x00, 0x0e, 0x00, 0x13, 0x7d, 0xef, 0x81, 0x69, 0x51, 0xef,
 		0x20, 0xe9, 0x31, 0x43, };
 
-//*****************************************************************************
-//
-// The following are data structures used by FatFs.
-//
-//*****************************************************************************
-static FATFS fs;
 
 //*****************************************************************************
 //
 // GrLib related structures.
 //
 //*****************************************************************************
-
 
 const tDisplay* pDisplay = &DisplayStructure;
 tContext sContext;
@@ -169,21 +162,20 @@ void SysTickHandler(void)
 	//
 	disk_timerproc();
 	ticks++;
-	if (ticks == 1000){
-		xpt2046_disableTouchIRQ();
+	if (ticks == 100)
+	{
 		ticks = 0;
-		updateClock(&sContext,pDisplay);
+		updateClock();
 	}
+
 }
 
-RectangularButton(pushBtn, 0, 0, 0, &DisplayStructure, 100, 100, 50, 50,
+RectangularButton(pushBtn, 0, 0, 0, &DisplayStructure, 	10, 50, 50, 50,
 		PB_STYLE_IMG | PB_STYLE_TEXT, ClrBlack, ClrBlack, 0, ClrSilver,
-		g_pFontCm20, "->", g_pucBlue50x50, g_pucBlue50x50Press, 0, 0, 0);
+		g_pFontCm20, "Push", g_pucBlue50x50, g_pucBlue50x50Press, 0, 0, 0);
 
 int main(void)
 {
-
-	FRESULT fresult;
 
 	//
 	// Set the system clock to run at 50MHz from the PLL.
@@ -191,39 +183,24 @@ int main(void)
 	SysCtlClockSet(
 			SYSCTL_SYSDIV_4 | SYSCTL_USE_PLL | SYSCTL_OSC_MAIN
 					| SYSCTL_XTAL_16MHZ);
+
 	//
 	// Configure SysTick for a 100Hz interrupt.
 	//
 	SysTickPeriodSet(SysCtlClockGet() / TICKS_PER_SECOND);
 	SysTickEnable();
-	SysTickIntEnable();
-	long systickPeriod = SysTickPeriodGet();
-	long sysCtlClk = SysCtlClockGet();
+//	SysTickIntEnable();
+
+	//
+	// Initialize the display context
+	//
+	GrContextInit(&sContext, pDisplay);
 
 	rtc_init();
-	DS3234_TIME now;
-//	now.ampm_mask = 0;
-//	now.hours = 16;
-//	now.minutes = 40;
-//	now.seconds = 50;
-
-	DS3234_DATE today;
-//	today.day_of_month = 5;
-//	today.day_of_week = 4;
-//	today.month = 3;
-//	today.year = 14;
-//
-//	ds3234_write_date(&today);
-//	ds3234_write_time(&now);
-
-	ds3234_read_date(&today);
-	ds3234_read_time(&now);
-	uint16_t temp = ds3234_read_temp();
-
-	printf("Temperature is: %d\n",temp);
+	initClock(&sContext, pDisplay);
 
 	// Mount fs
-//	fresult = f_mount(&fs, "0:", 1);
+	//	fresult = f_mount(&fs, "0:", 1);
 	char* filePath = "0:\\1.bmp";
 
 	// Init LCD
@@ -237,7 +214,6 @@ int main(void)
 	tBoolean bRetcode;
 	unsigned long ulW;
 
-	GrContextInit(&sContext, pDisplay);
 
 	//
 	// Open the background bitmap.
@@ -254,22 +230,6 @@ int main(void)
 	//
 	BitmapClose(pBitmap);
 
-	//Draw something
-	tRectangle sRect;
-	//
-	// Fill the top 24 rows of the screen with blue to create the banner.
-	//
-	sRect.sXMin = 0;
-	sRect.sYMin = 0;
-	sRect.sXMax = GrContextDpyWidthGet(&sContext) - 1;
-	sRect.sYMax = 23;
-
-	//
-	// Put a white box around the banner.
-	//
-	GrContextForegroundSet(&sContext, ClrWhite);
-	GrRectDraw(&sContext, &sRect);
-
 	//
 	// Put the application name in the middle of the banner.
 	//
@@ -277,22 +237,12 @@ int main(void)
 	GrStringDrawCentered(&sContext, APPLICATION_NAME, -1,
 			GrContextDpyWidthGet(&sContext) / 2, 8, 0);
 
-	char * str;
-
-	if (fresult == FR_OK)
-		str = "Filesystem OK";
-	else
-		str = "Filesystem ERROR";
-
-	str = "Hi, Itay";
-
-	GrStringDrawCentered(&sContext, str, -1,
-			GrContextDpyWidthGet(&sContext) / 2, 32, 0);
-
 	WidgetAdd(WIDGET_ROOT, (tWidget*) &pushBtn);
+
 	WidgetPaint(WIDGET_ROOT);
 
 	xpt2046_enableTouchIRQ();
+	SysTickIntEnable();
 
 	while (true)
 	{

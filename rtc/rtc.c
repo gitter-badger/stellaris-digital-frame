@@ -18,7 +18,6 @@
 #define BCD_TO_INT(X) ((X) & 0x0F) + (10*((X) >> 4))
 #define INT_TO_BCD(X) ((X) - ((X)/10)*10) | (((X) / 10) << 4)
 
-
 void (*_ds3234_init)();
 uint8_t (*_ds3234_transfer)(uint8_t);
 void (*_ds3234_slave_select)();
@@ -26,15 +25,23 @@ void (*_ds3234_slave_unselect)();
 
 void rtc_deselect()
 {
-	/* Deassert the chip select */
 	GPIOPinWrite(RTC_CS_PORT_BASE, RTC_CS_PIN, RTC_CS_PIN);
+	SSIDisable(RTC_SPI_PORT_BASE);
+	SSIConfigSetExpClk(RTC_SPI_PORT_BASE, SysCtlClockGet(), SSI_FRF_MOTO_MODE_0,
+			SSI_MODE_MASTER, 200000, 8);
+	/* Deassert the chip select */
+	SSIEnable(RTC_SPI_PORT_BASE);
 }
 
 void rtc_select()
 {
+	SSIDisable(RTC_SPI_PORT_BASE);
+	SSIConfigSetExpClk(RTC_SPI_PORT_BASE, SysCtlClockGet(), SSI_FRF_MOTO_MODE_1,
+			SSI_MODE_MASTER, 200000, 8);
+	SSIEnable(RTC_SPI_PORT_BASE);
 	GPIOPinWrite(RTC_CS_PORT_BASE, RTC_CS_PIN, 0);
+//	SysCtlDelay(10);
 }
-
 
 //
 // write/read data to rtc spi
@@ -72,13 +79,14 @@ void rtc_init()
 			RTC_MISO_PIN | RTC_MOSI_PIN | RTC_CLK_PIN);
 	GPIOPinTypeGPIOOutput(RTC_CS_PORT_BASE, RTC_CS_PIN);
 
-	rtc_select();
-	rtc_deselect();
-
-	GPIOPadConfigSet(RTC_GPIO_PORT_BASE, RTC_CS_PIN | RTC_MOSI_PIN | RTC_CLK_PIN,
-			GPIO_STRENGTH_4MA, GPIO_PIN_TYPE_STD);
+	GPIOPadConfigSet(RTC_GPIO_PORT_BASE,
+			RTC_CS_PIN | RTC_MOSI_PIN | RTC_CLK_PIN, GPIO_STRENGTH_4MA,
+			GPIO_PIN_TYPE_STD);
 	GPIOPadConfigSet(RTC_GPIO_PORT_BASE, RTC_MISO_PIN, GPIO_STRENGTH_4MA,
 			GPIO_PIN_TYPE_STD_WPU);
+
+	/* Deassert the chip select */
+	GPIOPinWrite(RTC_CS_PORT_BASE, RTC_CS_PIN, RTC_CS_PIN);
 
 	/* Configure the SPI port */
 	SSIConfigSetExpClk(RTC_SPI_PORT_BASE, SysCtlClockGet(), SSI_FRF_MOTO_MODE_1,
@@ -86,7 +94,8 @@ void rtc_init()
 	SSIEnable(RTC_SPI_PORT_BASE);
 }
 
-void ds3234_read_time(DS3234_TIME *time) {
+void ds3234_read_time(DS3234_TIME *time)
+{
 	_ds3234_slave_select();
 	_ds3234_transfer(0x00); //Seconds register
 	uint8_t data = _ds3234_transfer(0x00); //Dummy byte to receive seconds register
@@ -94,13 +103,16 @@ void ds3234_read_time(DS3234_TIME *time) {
 	data = _ds3234_transfer(0x00); //Dummy byte to burst receive minutes register
 	time->minutes = BCD_TO_INT(data);
 	data = _ds3234_transfer(0x00); //Dummy byte to burst reveive hours register
-	if (data & (1 << 6)) {
+	if (data & (1 << 6))
+	{
 		//Register is in 12 hour mode
 		//If bit 4 is set (10hr bit) increment hour by 10 (Captain Obvious!)
 		time->hours = (data & (1 << 4)) ? (data & 0x0F) + 10 : (data & 0x0F);
 		time->ampm_mask = 1;
 		time->ampm_mask |= (data & (1 << 5) >> 4); //bit 5 (AM/PM) of date shifted to bit 1 of ampm_mask
-	} else {
+	}
+	else
+	{
 		//Register is in 24 hour mode
 		//Bit 6 and 7 are guaranteed to be zero in this mode
 		time->hours = BCD_TO_INT(data);
@@ -109,23 +121,30 @@ void ds3234_read_time(DS3234_TIME *time) {
 	_ds3234_slave_unselect();
 }
 
-void ds3234_write_time(DS3234_TIME *time) {
+void ds3234_write_time(DS3234_TIME *time)
+{
 	_ds3234_slave_select();
 	_ds3234_transfer(0x80); //Write seconds register address
 	_ds3234_transfer(INT_TO_BCD(time->seconds)); //Write seconds register
 	_ds3234_transfer(INT_TO_BCD(time->minutes)); //Burst-write minutes register
-	if (time->ampm_mask) {
+	if (time->ampm_mask)
+	{
 		//The clock is in 12-hour mode;
-		_ds3234_transfer(INT_TO_BCD(time->hours) | (1 << 6) | ((time->ampm_mask & 2) << 5));
+		_ds3234_transfer(
+				INT_TO_BCD(time->hours) | (1 << 6)
+						| ((time->ampm_mask & 2) << 5));
 		//Burst-write hours register, bit 6 meaning we are in 12 hours mode and bit 5 AM/PM value
-	} else {
+	}
+	else
+	{
 		//The clock is in 24-hour mode
 		_ds3234_transfer(INT_TO_BCD(time->hours)); //Burst-write hours register
 	}
 	_ds3234_slave_unselect();
 }
 
-void ds3234_read_date(DS3234_DATE *date) {
+void ds3234_read_date(DS3234_DATE *date)
+{
 	uint8_t data;
 	_ds3234_slave_select();
 	_ds3234_transfer(0x03); //Day register address
@@ -136,13 +155,15 @@ void ds3234_read_date(DS3234_DATE *date) {
 	data = _ds3234_transfer(0x03); //Burst-read month and century register
 	date->month = BCD_TO_INT(data & 0x7F); //Ommit the century bit
 	date->control = 0;
-	if (data & 0x80) date->control |= 1;
+	if (data & 0x80)
+		date->control |= 1;
 	data = _ds3234_transfer(0x00); //Burst-read year register
 	date->year = BCD_TO_INT(data);
 	_ds3234_slave_unselect();
 }
 
-void ds3234_write_date(DS3234_DATE *date) {
+void ds3234_write_date(DS3234_DATE *date)
+{
 	_ds3234_slave_select();
 	_ds3234_transfer(0x83); //Write day register address
 	_ds3234_transfer(INT_TO_BCD(date->day_of_week));
@@ -152,7 +173,8 @@ void ds3234_write_date(DS3234_DATE *date) {
 	_ds3234_slave_unselect();
 }
 
-int16_t ds3234_read_temp() {
+int16_t ds3234_read_temp()
+{
 	int16_t temperature;
 	_ds3234_slave_select();
 	_ds3234_transfer(0x11); //Temperature register MSB
@@ -164,7 +186,8 @@ int16_t ds3234_read_temp() {
 	return temperature;
 }
 
-void ds3234_trigger_conversion() {
+void ds3234_trigger_conversion()
+{
 	uint8_t control;
 	_ds3234_slave_select();
 	_ds3234_transfer(0x0E); //Control register
@@ -179,7 +202,8 @@ void ds3234_trigger_conversion() {
 	_ds3234_slave_unselect();
 }
 
-uint8_t ds3234_read_register(uint8_t address) {
+uint8_t ds3234_read_register(uint8_t address)
+{
 	_ds3234_slave_select();
 	_ds3234_transfer(address);
 	int8_t data = _ds3234_transfer(0x00); //Read the register
@@ -187,14 +211,17 @@ uint8_t ds3234_read_register(uint8_t address) {
 	return data;
 }
 
-void ds3234_write_register(uint8_t address, uint8_t data) {
+void ds3234_write_register(uint8_t address, uint8_t data)
+{
 	_ds3234_slave_select();
 	_ds3234_transfer(address | 0x80); //First byte of write address is one
 	_ds3234_transfer(data);
 	_ds3234_slave_unselect();
 }
 
-void ds3234_read_alarm1(DS3234_DATE *date, DS3234_TIME *time, uint8_t *alarm_mask) {
+void ds3234_read_alarm1(DS3234_DATE *date, DS3234_TIME *time,
+		uint8_t *alarm_mask)
+{
 	uint8_t seconds, minutes, hour, day;
 	_ds3234_slave_select();
 	_ds3234_transfer(0x07); //Alarm 1 seconds register;
@@ -207,16 +234,23 @@ void ds3234_read_alarm1(DS3234_DATE *date, DS3234_TIME *time, uint8_t *alarm_mas
 	date->control = 1; //day_of_week and day_of_month can not be both valid.
 
 	*alarm_mask = 0;
-	if (seconds & 0x80) *alarm_mask |= 0x01;
-	if (minutes & 0x80) *alarm_mask |= 0x02;
-	if (hour & 0x80) *alarm_mask |= 0x04;
-	if (day & 0x80) *alarm_mask |= 0x08;
-	if (day & 0x40) {
+	if (seconds & 0x80)
+		*alarm_mask |= 0x01;
+	if (minutes & 0x80)
+		*alarm_mask |= 0x02;
+	if (hour & 0x80)
+		*alarm_mask |= 0x04;
+	if (day & 0x80)
+		*alarm_mask |= 0x08;
+	if (day & 0x40)
+	{
 		*alarm_mask |= 0x10;
 		date->control |= 2; //day_of_week is valid.
 		day &= 0x3F;
 		date->day_of_week = BCD_TO_INT(day);
-	} else {
+	}
+	else
+	{
 		day &= 0x3F;
 		date->day_of_month = BCD_TO_INT(day);
 	} //Extract settings mask from registers
@@ -228,13 +262,16 @@ void ds3234_read_alarm1(DS3234_DATE *date, DS3234_TIME *time, uint8_t *alarm_mas
 	time->seconds = BCD_TO_INT(seconds);
 	time->minutes = BCD_TO_INT(minutes);
 
-	if (hour & (1 << 6)) {
+	if (hour & (1 << 6))
+	{
 		//Register is in 12 hour mode
 		//If bit 4 is set (10hr bit) increment hour by 10 (Captain Obvious!)
 		time->hours = (hour & (1 << 4)) ? (hour & 0x0F) + 10 : (hour & 0x0F);
 		time->ampm_mask = 1;
 		time->ampm_mask |= (hour & (1 << 5) >> 4); //bit 5 (AM/PM) of date shifted to bit 1 of ampm_mask
-	} else {
+	}
+	else
+	{
 		//Register is in 24 hour mode
 		//Bit 6 and 7 are guaranteed to be zero in this mode
 		time->hours = BCD_TO_INT(hour);
@@ -243,34 +280,48 @@ void ds3234_read_alarm1(DS3234_DATE *date, DS3234_TIME *time, uint8_t *alarm_mas
 
 }
 
-void ds3234_write_alarm1(DS3234_DATE *date, DS3234_TIME *time, uint8_t alarm_mask) {
+void ds3234_write_alarm1(DS3234_DATE *date, DS3234_TIME *time,
+		uint8_t alarm_mask)
+{
 	uint8_t seconds, minutes, hour, day;
 
 	seconds = INT_TO_BCD(time->seconds);
 	minutes = INT_TO_BCD(time->minutes);
-	if (time->ampm_mask) {
+	if (time->ampm_mask)
+	{
 		//The clock is in 12-hour mode;
-		hour = INT_TO_BCD(time->hours) | (1 << 6) | ((time->ampm_mask & 2) << 5);
+		hour = INT_TO_BCD(time->hours) | (1 << 6)
+				| ((time->ampm_mask & 2) << 5);
 		//Burst-write hours register, bit 6 meaning we are in 12 hours mode and bit 5 AM/PM value
-	} else {
+	}
+	else
+	{
 		//The clock is in 24-hour mode
 		hour = INT_TO_BCD(time->hours);
 	}
 
-	if (date->control & 2) {
+	if (date->control & 2)
+	{
 		//Day of week is valid
 		day = INT_TO_BCD(date->day_of_week);
 		day |= (1 << 6); //Set Day (of week) bit in the day register
-	} else {
+	}
+	else
+	{
 		//Day of month is valid
 		day = INT_TO_BCD(date->day_of_month);
 	} //Prepare values to the registers
 
-	if (alarm_mask & 1) seconds |= (1 << 7);
-	if (alarm_mask & 2) minutes |= (1 << 7);
-	if (alarm_mask & 4) hour |= (1 << 7);
-	if (alarm_mask & 8) day |= (1 << 7);
-	if (alarm_mask & 0x10) day |= (1 << 6);
+	if (alarm_mask & 1)
+		seconds |= (1 << 7);
+	if (alarm_mask & 2)
+		minutes |= (1 << 7);
+	if (alarm_mask & 4)
+		hour |= (1 << 7);
+	if (alarm_mask & 8)
+		day |= (1 << 7);
+	if (alarm_mask & 0x10)
+		day |= (1 << 6);
 	//Superimpose alarm settings mask to the registers
 
 	_ds3234_slave_select();
@@ -282,7 +333,9 @@ void ds3234_write_alarm1(DS3234_DATE *date, DS3234_TIME *time, uint8_t alarm_mas
 	_ds3234_slave_unselect(); //Burst-write alarm 1 registers
 }
 
-void ds3234_read_alarm2(DS3234_DATE *date, DS3234_TIME *time, uint8_t *alarm_mask) {
+void ds3234_read_alarm2(DS3234_DATE *date, DS3234_TIME *time,
+		uint8_t *alarm_mask)
+{
 	uint8_t minutes, hour, day;
 
 	_ds3234_slave_select();
@@ -295,15 +348,21 @@ void ds3234_read_alarm2(DS3234_DATE *date, DS3234_TIME *time, uint8_t *alarm_mas
 	*alarm_mask = 0;
 	date->control = 1; //day_of_month and day_of_week can't be both valid
 
-	if (minutes & 0x80) *alarm_mask |= 0x01;
-	if (hour & 0x80) *alarm_mask |= 0x02;
-	if (day & 0x80) *alarm_mask |= 0x04;
-	if (day & 0x40) {
+	if (minutes & 0x80)
+		*alarm_mask |= 0x01;
+	if (hour & 0x80)
+		*alarm_mask |= 0x02;
+	if (day & 0x80)
+		*alarm_mask |= 0x04;
+	if (day & 0x40)
+	{
 		*alarm_mask |= 0x08;
 		date->control |= 2; //day_of_week is valid.
 		day &= 0x3F;
 		date->day_of_week = BCD_TO_INT(day);
-	} else {
+	}
+	else
+	{
 		day &= 0x3F;
 		date->day_of_month = BCD_TO_INT(day);
 	} //Extract settings mask from registers
@@ -313,13 +372,16 @@ void ds3234_read_alarm2(DS3234_DATE *date, DS3234_TIME *time, uint8_t *alarm_mas
 
 	time->minutes = BCD_TO_INT(minutes);
 
-	if (hour & (1 << 6)) {
+	if (hour & (1 << 6))
+	{
 		//Register is in 12 hour mode
 		//If bit 4 is set (10hr bit) increment hour by 10 (Captain Obvious!)
 		time->hours = (hour & (1 << 4)) ? (hour & 0x0F) + 10 : (hour & 0x0F);
 		time->ampm_mask = 1;
 		time->ampm_mask |= (hour & (1 << 5) >> 4); //bit 5 (AM/PM) of date shifted to bit 1 of ampm_mask
-	} else {
+	}
+	else
+	{
 		//Register is in 24 hour mode
 		//Bit 6 and 7 are guaranteed to be zero in this mode
 		time->hours = BCD_TO_INT(hour);
@@ -327,31 +389,44 @@ void ds3234_read_alarm2(DS3234_DATE *date, DS3234_TIME *time, uint8_t *alarm_mas
 	}
 }
 
-void ds3234_write_alarm2(DS3234_DATE *date, DS3234_TIME *time, uint8_t alarm_mask) {
+void ds3234_write_alarm2(DS3234_DATE *date, DS3234_TIME *time,
+		uint8_t alarm_mask)
+{
 	uint8_t minutes, hour, day;
 
 	minutes = INT_TO_BCD(time->minutes);
-	if (time->ampm_mask) {
+	if (time->ampm_mask)
+	{
 		//The clock is in 12-hour mode;
-		hour = INT_TO_BCD(time->hours) | (1 << 6) | ((time->ampm_mask & 2) << 5);
+		hour = INT_TO_BCD(time->hours) | (1 << 6)
+				| ((time->ampm_mask & 2) << 5);
 		//Burst-write hours register, bit 6 meaning we are in 12 hours mode and bit 5 AM/PM value
-	} else {
+	}
+	else
+	{
 		//The clock is in 24-hour mode
 		hour = INT_TO_BCD(time->hours);
 	}
 
-	if (date->control & 2) {
+	if (date->control & 2)
+	{
 		//Day of week is valid
 		day = INT_TO_BCD(date->day_of_week);
-	} else {
+	}
+	else
+	{
 		//Day of month is valid
 		day = INT_TO_BCD(date->day_of_month);
 	} //Prepare values to the registers
 
-	if (alarm_mask & 1) minutes |= (1 << 7);
-	if (alarm_mask & 2) hour |= (1 << 7);
-	if (alarm_mask & 4) day |= (1 << 7);
-	if (alarm_mask & 8) day |= (1 << 6);
+	if (alarm_mask & 1)
+		minutes |= (1 << 7);
+	if (alarm_mask & 2)
+		hour |= (1 << 7);
+	if (alarm_mask & 4)
+		day |= (1 << 7);
+	if (alarm_mask & 8)
+		day |= (1 << 6);
 	//Superimpose alarm settings mask to the registers
 
 	_ds3234_slave_select();
@@ -362,7 +437,8 @@ void ds3234_write_alarm2(DS3234_DATE *date, DS3234_TIME *time, uint8_t alarm_mas
 	_ds3234_slave_unselect(); //Burst-write alarm 2 registers
 }
 
-void ds3234_read_RAM(uint8_t address, uint8_t length, uint8_t *data) {
+void ds3234_read_RAM(uint8_t address, uint8_t length, uint8_t *data)
+{
 	_ds3234_slave_select();
 	_ds3234_transfer(0x98); //SRAM Address register
 	_ds3234_transfer(address); //SRAM address
@@ -370,7 +446,8 @@ void ds3234_read_RAM(uint8_t address, uint8_t length, uint8_t *data) {
 
 	_ds3234_slave_select();
 	_ds3234_transfer(0x19); //SRAM Data register
-	while (length--) {
+	while (length--)
+	{
 		*data = _ds3234_transfer(0x00); //Burst transfer contents of the register.
 		//During this transfer the Register address won't change, hovewer, SRAM adress in
 		//SRAM address register will increment automatically, see DS3234's datasheet page 17.
@@ -379,7 +456,8 @@ void ds3234_read_RAM(uint8_t address, uint8_t length, uint8_t *data) {
 	_ds3234_slave_unselect();
 }
 
-void ds3234_write_RAM(uint8_t address, uint8_t length, uint8_t *data) {
+void ds3234_write_RAM(uint8_t address, uint8_t length, uint8_t *data)
+{
 	_ds3234_slave_select();
 	_ds3234_transfer(0x98); //SRAM Address register
 	_ds3234_transfer(address); //SRAM address
@@ -387,7 +465,8 @@ void ds3234_write_RAM(uint8_t address, uint8_t length, uint8_t *data) {
 
 	_ds3234_slave_select();
 	_ds3234_transfer(0x99); //SRAM write data register
-	while (length--) {
+	while (length--)
+	{
 		_ds3234_transfer(*data); //Burst transfer contents of the register.
 		//During this transfer the Register address won't change, hovewer, SRAM adress in
 		//SRAM address register will increment automatically, see DS3234's datasheet page 17.
