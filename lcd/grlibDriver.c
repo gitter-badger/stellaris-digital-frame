@@ -6,15 +6,16 @@
  */
 #include "grlibDriver.h"
 
-inline unsigned long ColorTranslate(void *pvDisplayData, unsigned long ulValue)
+// Translates 24bit RGB to RGB565
+unsigned long ColorTranslate(void *pvDisplayData, unsigned long ulValue)
 {
 	//
 	// Translate from a 24-bit RGB color to a 5-6-5 RGB color.
-	//
 	unsigned char r = ulValue >> 16;
 	unsigned char g = ulValue >> 8;
 	unsigned char b = ulValue;
-	return ssd1289_rgb(r,g,b) ;
+	color_t color = ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | ((b & 0xF8) >> 3);
+	return color;
 }
 
 void Flush(void *pvDisplayData)
@@ -74,8 +75,8 @@ void PixelDrawMultiple(void *pvDisplayData, long lX, long lY, long lX0,
 				// Draw this pixel in the appropriate color.
 				//
 				ssd1289_pixel(
-						(color_t) ((((unsigned long *) pucPalette)[(ulByte
-								>> (7 - lX0)) & 1])), lY, lX++);
+						ColorTranslate(0,(((((unsigned long *) pucPalette)[(ulByte
+								>> (7 - lX0)) & 1])))), lY, lX++);
 				//WriteData(((unsigned long *)pucPalette)[(ulByte >>(7 - lX0)) & 1]);
 			}
 
@@ -233,11 +234,10 @@ void RectFill(void *pvDisplayData, const tRectangle *pRect,
 	x2 = pRect->sXMax;
 	y1 = pRect->sYMin;
 	y2 = pRect->sYMax;
-	trueColor = ColorTranslate(0, ulValue);
 
 	for (; x1 <= x2; x1++)
 	{
-		ssd1289_vline(trueColor, y1, x1, y2 - y1);
+		ssd1289_vline(ulValue, y1, x1, y2 - y1);
 	}
 }
 

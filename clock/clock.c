@@ -14,7 +14,8 @@
 #include "clock.h"
 
 static volatile int initiallized = 0;
-static char* timeDisplayFormat = "%d:%d:%d, %d/%d/%d";
+static volatile int show = 0;
+static char* timeDisplayFormat = "%02d:%02d:%02d %02d/%02d/%02d";
 static tCanvasWidget clockWidget;
 
 static tContext* p_clockContext;
@@ -23,7 +24,7 @@ static const tDisplay* p_clockDisplay;
 DS3234_DATE today;
 DS3234_TIME now;
 
-char datetime[25];
+char datetime[30];
 
 void initClock(tContext* pContext, const tDisplay* pDisplay)
 {
@@ -36,7 +37,7 @@ void initClock(tContext* pContext, const tDisplay* pDisplay)
 	p_clockContext = pContext;
 	p_clockDisplay = pDisplay;
 
-	CanvasInit(&clockWidget, p_clockDisplay, 1, 1, 80, 10);
+	CanvasInit(&clockWidget, p_clockDisplay, 1, 1, 120, 20);
 	CanvasFillOn(&clockWidget);
 	CanvasFillColorSet(&clockWidget,ClrBlack);
 	CanvasTextOn(&clockWidget);
@@ -48,8 +49,7 @@ void initClock(tContext* pContext, const tDisplay* pDisplay)
 			today.day_of_month, today.month, today.year);
 
 	CanvasTextSet(&clockWidget, datetime);
-	CanvasFontSet(&clockWidget, g_pFontCm12);
-	WidgetAdd(WIDGET_ROOT, (tWidget*) &clockWidget);
+	CanvasFontSet(&clockWidget, g_pFontCm14);
 
 	initiallized = 1;
 }
@@ -62,6 +62,9 @@ void updateClock()
 	if (!initiallized)
 		return;
 
+	if (!show)
+		return;
+
 	ds3234_read_time(&now);
 	ds3234_read_date(&today);
 
@@ -71,6 +74,16 @@ void updateClock()
 	CanvasTextSet(&clockWidget, datetime);
 
 	WidgetPaint((tWidget*)&clockWidget);
+}
+
+void hideClock() {
+	show = 0;
+	WidgetRemove((tWidget*)&clockWidget);
+}
+
+void showClock() {
+	show = 1;
+	WidgetAdd(WIDGET_ROOT,(tWidget*)&clockWidget);
 }
 
 void setClock(DS3234_DATE date, DS3234_TIME time)

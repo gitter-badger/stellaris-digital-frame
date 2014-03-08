@@ -300,27 +300,28 @@ ssd1289_pixel(color_t color, yaxis_t y, xaxis_t x)
 	}
 }
 
-void
-ssd1289_rainbow()
-{
-	yaxis_t y;
-	xaxis_t x;
-	uint8_t r, g, b;
-	
-	ssd1289_set_cursor(0, 0);
-    ssd1289_send_cmd(0x0022);
-    
-    for(y = 0; y < SSD1289_HEIGHT; y++)
-    {
-        for(x = 0; x < SSD1289_WIDTH; x++)
-        {
-			r = x * 0xff /(SSD1289_WIDTH - 1);
-			g = y * 0xff /(SSD1289_HEIGHT - 1);
-			b = 0xff - r;
-			ssd1289_send_data(ssd1289_rgb(r, g, b));
-        }
-	}
-}
+//
+//void
+//ssd1289_rainbow()
+//{
+//	yaxis_t y;
+//	xaxis_t x;
+//	uint8_t r, g, b;
+//
+//	ssd1289_set_cursor(0, 0);
+//    ssd1289_send_cmd(0x0022);
+//
+//    for(y = 0; y < SSD1289_HEIGHT; y++)
+//    {
+//        for(x = 0; x < SSD1289_WIDTH; x++)
+//        {
+//			r = x * 0xff /(SSD1289_WIDTH - 1);
+//			g = y * 0xff /(SSD1289_HEIGHT - 1);
+//			b = 0xff - r;
+//			ssd1289_send_data(ssd1289_rgb(r, g, b));
+//        }
+//	}
+//}
 
 /*
 uint16_t

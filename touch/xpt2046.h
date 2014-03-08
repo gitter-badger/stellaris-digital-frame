@@ -25,8 +25,8 @@
 #define TOUCH_IRQ_PIN			GPIO_PIN_0
 
 // Maximum and minimum readings
-#define TOUCH_X0 200
-#define TOUCH_Y0 200
+#define TOUCH_X0 350
+#define TOUCH_Y0 350
 #define TOUCH_X1 3700
 #define TOUCH_Y1 3700
 

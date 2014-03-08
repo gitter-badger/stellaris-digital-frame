@@ -76,7 +76,7 @@ typedef uint16_t color_t;
 #define SSD1289_REG_GDDRAM_X_ADDR    0x4e
 #define SSD1289_REG_GDDRAM_Y_ADDR    0x4f
 
-#define ssd1289_rgb(r,g,b) ((color_t)(((r & 0x1F) << 11) | ((g & 0x3F) << 5) | (b & 0x1F)))
+#define ssd1289_rgb(r,g,b) ((color_t)(((r >> 3) << 11) | ((g >> 3) << 5) | ((b >> 3))))
 
 void ssd1289_char(color_t color, char ch, yaxis_t y, xaxis_t x);
 void ssd1289_string(color_t color, char *string, yaxis_t y, xaxis_t x);

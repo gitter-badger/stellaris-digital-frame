@@ -21,11 +21,8 @@
 #include "bmp/bmpdisplay.h"
 #include "bmp/bmpfile.h"
 #include "clock/clock.h"
+#include "apps/setTimeApp.h"
 #include "main.h"
-
-volatile unsigned int status = 0, standby_active = 0;
-volatile long on_time = 0;
-volatile unsigned long sec_time = 0;
 
 const unsigned char g_pucBlue50x50[] =
 { IMAGE_FMT_4BPP_COMP, 50, 0, 50, 0,
@@ -131,7 +128,6 @@ const unsigned char g_pucBlue50x50Press[] =
 		0xe2, 0x45, 0x00, 0x0e, 0x00, 0x13, 0x7d, 0xef, 0x81, 0x69, 0x51, 0xef,
 		0x20, 0xe9, 0x31, 0x43, };
 
-
 //*****************************************************************************
 //
 // GrLib related structures.
@@ -154,7 +150,7 @@ tContext sContext;
 // timer tick every 10 ms for internal timing purposes.
 //
 //*****************************************************************************
-int ticks = 0;
+volatile int ticks = 0;
 void SysTickHandler(void)
 {
 	//
@@ -170,13 +166,43 @@ void SysTickHandler(void)
 
 }
 
-RectangularButton(pushBtn, 0, 0, 0, &DisplayStructure, 	10, 50, 50, 50,
-		PB_STYLE_IMG | PB_STYLE_TEXT, ClrBlack, ClrBlack, 0, ClrSilver,
-		g_pFontCm20, "Push", g_pucBlue50x50, g_pucBlue50x50Press, 0, 0, 0);
+#define buttonWidth 180
+#define buttonHieght 50
+
+void onSetTimeBtnClk();
+
+Canvas(backgroundCanvas, WIDGET_ROOT, 0, 0, &DisplayStructure, 0, 0, 319, 239,
+		CANVAS_STYLE_FILL, ClrBlack, ClrWhite, ClrBlack, 0,0, 0, 0);
+
+RectangularButton(setTimeBtn, 0, 0, 0, &DisplayStructure,
+		320 / 2 - buttonWidth / 2, 240 / 2 - buttonHieght + 20, 200, 50,
+		PB_STYLE_TEXT | PB_STYLE_FILL | PB_STYLE_OUTLINE, ClrRed, ClrRed,
+		ClrWhite, ClrWhite, g_pFontCm26b, "Set Time", 0, 0, 0, 0,
+		onSetTimeBtnClk);
+
+RectangularButton(watchPicsBtn, 0, 0, 0, &DisplayStructure,
+		320 / 2 - buttonWidth / 2, 240 / 2 + buttonHieght - 20, 200, 50,
+		PB_STYLE_TEXT | PB_STYLE_FILL | PB_STYLE_OUTLINE, ClrRed, ClrRed,
+		ClrWhite, ClrWhite, g_pFontCm26b, "Start slideshow", 0, 0, 0, 0, 0);
+
+void onSetTimeBtnClk()
+{
+	hideClock();
+	WidgetRemove((tWidget*) &setTimeBtn);
+	WidgetRemove((tWidget*) &watchPicsBtn);
+	StartSetTimeApp(&backgroundCanvas);
+}
+
+void startMainMenuApplication()
+{
+	showClock();
+	WidgetAdd((tWidget*) &backgroundCanvas, (tWidget*) &setTimeBtn);
+	WidgetAdd((tWidget*) &backgroundCanvas, (tWidget*) &watchPicsBtn);
+	WidgetPaint(WIDGET_ROOT);
+}
 
 int main(void)
 {
-
 	//
 	// Set the system clock to run at 50MHz from the PLL.
 	//
@@ -189,60 +215,35 @@ int main(void)
 	//
 	SysTickPeriodSet(SysCtlClockGet() / TICKS_PER_SECOND);
 	SysTickEnable();
-//	SysTickIntEnable();
+
+	/// Init RTC
+	rtc_init();
+
+	// Init LCD
+	ssd1289_init();
 
 	//
 	// Initialize the display context
 	//
 	GrContextInit(&sContext, pDisplay);
-
-	rtc_init();
 	initClock(&sContext, pDisplay);
-
-	// Mount fs
-	//	fresult = f_mount(&fs, "0:", 1);
-	char* filePath = "0:\\1.bmp";
-
-	// Init LCD
-	ssd1289_init();
 
 	// Init touch
 	xpt2046_init();
 	xpt2046_setTouchScreenCallback(WidgetPointerMessage);
 
-	tBitmapInst *pBitmap;
-	tBoolean bRetcode;
-	unsigned long ulW;
-
-
-	//
-	// Open the background bitmap.
-	//
-	pBitmap = BitmapOpen(filePath);
-
-	//
-	// Draw it in the top left.
-	//
-	bRetcode = BitmapDraw(pBitmap, &sContext, 0, 0);
-
-	//
-	// Close the background.
-	//
-	BitmapClose(pBitmap);
-
 	//
 	// Put the application name in the middle of the banner.
 	//
-	GrContextFontSet(&sContext, g_pFontCm20);
-	GrStringDrawCentered(&sContext, APPLICATION_NAME, -1,
-			GrContextDpyWidthGet(&sContext) / 2, 8, 0);
-
-	WidgetAdd(WIDGET_ROOT, (tWidget*) &pushBtn);
-
-	WidgetPaint(WIDGET_ROOT);
+//	GrContextFontSet(&sContext, g_pFontCm20);
+//	GrStringDrawCentered(&sContext, APPLICATION_NAME, -1,
+//			GrContextDpyWidthGet(&sContext) / 2, 8, 0);
 
 	xpt2046_enableTouchIRQ();
 	SysTickIntEnable();
+
+	WidgetAdd(WIDGET_ROOT, (tWidget*) &backgroundCanvas);
+	startMainMenuApplication();
 
 	while (true)
 	{
@@ -251,5 +252,4 @@ int main(void)
 		//
 		WidgetMessageQueueProcess();
 	}
-
 }

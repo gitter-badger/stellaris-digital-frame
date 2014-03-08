@@ -18,6 +18,7 @@ extern tCanvasWidget clockWidget;
 void initClock(tContext*,const tDisplay*);
 void updateClock();
 void removeClock();
-
+void showClock();
+void hideClock();
 
 #endif /* CLOCK_H_ */
