@@ -29,7 +29,7 @@ void onPaintBackgroundPaint(tWidget* pWidget, tContext* ctx)
 	GrContextFontSet(ctx, g_pFontCm30b);
 	GrContextForegroundSet(ctx, ClrRed);
 	GrStringDrawCentered(ctx, APPLICATION_NAME, -1,
-			GrContextDpyWidthGet(ctx) / 2, 30, 0);
+			GrContextDpyWidthGet(ctx) / 2, 40, 0);
 	// Put the application name in the middle of the banner.
 	GrContextFontSet(ctx, g_pFontCm14);
 	GrContextForegroundSet(ctx, ClrAquamarine);
@@ -39,7 +39,7 @@ void onPaintBackgroundPaint(tWidget* pWidget, tContext* ctx)
 }
 
 Canvas(mainMenuBackgroundCanvas, WIDGET_ROOT, 0, 0, &DisplayStructure, 0, 0,
-		319, 239, CANVAS_STYLE_FILL | CANVAS_STYLE_APP_DRAWN, ClrBlack,
+		320, 240, CANVAS_STYLE_FILL | CANVAS_STYLE_APP_DRAWN, ClrBlack,
 		ClrWhite, ClrBlack, 0, 0, 0, onPaintBackgroundPaint);
 
 RectangularButton(startSlideshowBtn, &mainMenuBackgroundCanvas, 0, 0,
@@ -73,7 +73,7 @@ void onSetTimeBtnClk()
 void onStartSlideshowBtnClk()
 {
 	exitMainMenuApp();
-	startSlideShowApp();
+	startSlideShowApp(5);
 }
 
 void onSelectPicApp()

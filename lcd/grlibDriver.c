@@ -238,7 +238,7 @@ void RectFill(void *pvDisplayData, const tRectangle *pRect,
 
 	for (; x1 <= x2; x1++)
 	{
-		ssd1289_vline(ColorTranslate(0,ulValue), y1, x1, y2 - y1);
+		ssd1289_vline(ulValue, y1, x1, y2 - y1);
 	}
 }
 

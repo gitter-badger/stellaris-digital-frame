@@ -1,5 +1,5 @@
 #include <string.h>
-
+#include <stdio.h>
 #include "inc/lm3s9b92.h"
 #include "driverlib/rom.h"
 #include "inc/hw_memmap.h"
@@ -64,12 +64,13 @@ void SysTickHandler(void)
 int main(void)
 {
 	//
-	// Set the system clock to run at 50MHz from the PLL.
+	// Set the system clock to run at 80MHz (max freq) from the PLL.
 	//
 	SysCtlClockSet(
-			SYSCTL_SYSDIV_4 | SYSCTL_USE_PLL | SYSCTL_OSC_MAIN
+			SYSCTL_SYSDIV_2_5 | SYSCTL_USE_PLL | SYSCTL_OSC_MAIN
 					| SYSCTL_XTAL_16MHZ);
 
+	printf("clock is %d\n", SysCtlClockGet());
 	//
 	// Configure SysTick for a 100Hz interrupt.
 	//
@@ -97,11 +98,11 @@ int main(void)
 
 	startMainMenuApplication();
 
-		while (true)
-		{
-			//
-			// Process any messages in the widget message queue.
-			//
-			WidgetMessageQueueProcess();
-		}
+	while (true)
+	{
+		//
+		// Process any messages in the widget message queue.
+		//
+		WidgetMessageQueueProcess();
 	}
+}

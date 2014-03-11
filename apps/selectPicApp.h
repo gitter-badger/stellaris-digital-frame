@@ -11,5 +11,4 @@
 
 void startSelectPicApp();
 
-
 #endif /* SELECTPICAPP_C_ */

@@ -53,7 +53,7 @@ void initClock(const tDisplay* pDisplay)
 }
 
 ///
-/// Should be called every minute
+/// Should be called every second
 ///
 void updateClock()
 {
