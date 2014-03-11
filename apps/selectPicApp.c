@@ -144,6 +144,7 @@ void exitSelectPicApp()
 	int i = 0;
 	for (; i < FILE_LIST_LENGTH; i++)
 		free((void*)strings[i]);
+	WidgetRemove((tWidget*) &GeneralErrorMsg);
 	WidgetRemove((tWidget*) &selectPicBackgroundCanvas);
 	WidgetRemove((tWidget*) &backToMenuBtn);
 }
