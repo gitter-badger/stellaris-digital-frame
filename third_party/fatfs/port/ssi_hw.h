@@ -69,6 +69,6 @@
 #define SDCARD_VCC_BASE     GPIO_PORTA_BASE
 #define SDCARD_VCC_PIN      GPIO_PIN_6
 
-
+#define SDC_SSI_MAX_SPEED 	12500000
 
 #endif // __SSI_HW_H__

@@ -35,12 +35,11 @@ void initClock(const tDisplay* pDisplay)
 
 	p_clockDisplay = pDisplay;
 
-	CanvasInit(&clockWidget, p_clockDisplay, 1, 1, 120, 20);
+	CanvasInit(&clockWidget, p_clockDisplay, 0, 0, CLOCK_WIDTH, CLOCK_HEIGHT);
 	CanvasFillOn(&clockWidget);
 	CanvasFillColorSet(&clockWidget, ClrBlack);
 	CanvasTextOn(&clockWidget);
-	CanvasTextAlignment(&clockWidget,
-			CANVAS_STYLE_TEXT_HCENTER | CANVAS_STYLE_TEXT_VCENTER);
+	CanvasTextAlignment(&clockWidget, CANVAS_STYLE_TEXT_HCENTER | CANVAS_STYLE_TEXT_VCENTER);
 	CanvasTextColorSet(&clockWidget, ClrAqua);
 
 	sprintf(datetime, timeDisplayFormat, now.hours, now.minutes, now.seconds,

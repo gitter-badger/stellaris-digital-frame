@@ -38,6 +38,8 @@ void onPaintBackgroundPaint(tWidget* pWidget, tContext* ctx)
 	GrImageDraw(ctx, g_pucLogo, 5, GrContextDpyHeightGet(ctx) - 70);
 }
 
+// Widgets
+
 Canvas(mainMenuBackgroundCanvas, WIDGET_ROOT, 0, 0, &DisplayStructure, 0, 0,
 		320, 240, CANVAS_STYLE_FILL | CANVAS_STYLE_APP_DRAWN, ClrBlack,
 		ClrWhite, ClrBlack, 0, 0, 0, onPaintBackgroundPaint);
@@ -48,8 +50,8 @@ RectangularButton(startSlideshowBtn, &mainMenuBackgroundCanvas, 0, 0,
 		ClrRed, ClrRed, ClrWhite, ClrWhite, g_pFontCm26, "Start Slideshow", 0,
 		0, 0, 0, onStartSlideshowBtnClk);
 
-RectangularButton(viewSinglePicBtn, &mainMenuBackgroundCanvas, &startSlideshowBtn, 0,
-		&DisplayStructure, FIRST_BTN_X_COR,
+RectangularButton(viewSinglePicBtn, &mainMenuBackgroundCanvas,
+		&startSlideshowBtn, 0, &DisplayStructure, FIRST_BTN_X_COR,
 		FIRST_BTN_Y_COR + MENU_BTN_HIEGHT + MENU_BTN_PADDING_TOP,
 		MENU_BTN_WIDTH, MENU_BTN_HIEGHT,
 		PB_STYLE_TEXT | PB_STYLE_FILL | PB_STYLE_OUTLINE, ClrRed, ClrRed,
@@ -73,7 +75,7 @@ void onSetTimeBtnClk()
 void onStartSlideshowBtnClk()
 {
 	exitMainMenuApp();
-	startSlideShowApp(5);
+	startSlideShowApp(6);
 }
 
 void onSelectPicApp()
@@ -91,7 +93,7 @@ void startMainMenuApplication()
 	WidgetAdd((tWidget*) &mainMenuBackgroundCanvas,
 			(tWidget*) &viewSinglePicBtn);
 	WidgetAdd((tWidget*) &mainMenuBackgroundCanvas,
-				(tWidget*) &startSlideshowBtn);
+			(tWidget*) &startSlideshowBtn);
 
 	WidgetPaint(WIDGET_ROOT);
 }

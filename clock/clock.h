@@ -12,6 +12,9 @@
 #include "grlib/widget.h"
 #include "grlib/canvas.h"
 
+#define CLOCK_WIDTH 	120
+#define CLOCK_HEIGHT	20
+
 extern tCanvasWidget clockWidget;
 
 void initClock(const tDisplay*);

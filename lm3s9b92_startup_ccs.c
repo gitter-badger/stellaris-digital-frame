@@ -58,7 +58,7 @@ extern uint32_t __STACK_TOP;
 // To be added by user
 extern void TouchScreenIntHandler(void);
 extern void SysTickHandler(void);
-extern void DrawNextPicture(void);
+extern void DrawNextPictureHandler(void);
 
 //*****************************************************************************
 //
@@ -106,7 +106,7 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler,                      // ADC Sequence 2
     IntDefaultHandler,                      // ADC Sequence 3
     IntDefaultHandler,                      // Watchdog timer
-    DrawNextPicture,           	            // Timer 0 subtimer A
+    DrawNextPictureHandler,           	            // Timer 0 subtimer A
     IntDefaultHandler,                      // Timer 0 subtimer B
     IntDefaultHandler,                      // Timer 1 subtimer A
     IntDefaultHandler,                      // Timer 1 subtimer B

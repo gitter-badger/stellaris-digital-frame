@@ -36,7 +36,7 @@ RectangularButton(exitBtn, WIDGET_ROOT, 0, 0, &DisplayStructure, 0, 0, 319, 239,
 FATFS sildeShowFatfs;
 tContext Context;
 tBoolean ready = false;
-DIR rootDir;
+DIR slideShowRootDir;
 FILINFO currentFileInfo;
 tBitmapInst* pBtmpInst;
 
@@ -70,7 +70,7 @@ unsigned char areThereViewableBmpFiles()
 	char fullPath[16];
 	do
 	{
-		f_readdir(&rootDir, &finfo);
+		f_readdir(&slideShowRootDir, &finfo);
 		sprintf(fullPath, "0:%s", finfo.fname);
 		pBtmpInst = BitmapOpen(fullPath);
 		if (pBtmpInst != 0)
@@ -83,6 +83,77 @@ unsigned char areThereViewableBmpFiles()
 	} while (strcmp(finfo.fname, "\0") != 0);
 
 	return retVal;
+}
+
+void findNextFile()
+{
+	FILINFO fileInfo;
+	int completedRound = 0;
+	while (true)
+	{
+		// get the first file
+		f_readdir(&slideShowRootDir, &fileInfo);
+		// if we are looking for a ghost or checked all the files already, return
+		if (completedRound || strcmp(currentFileInfo.fname, "\0") == 0)
+		{
+			currentFileInfo = fileInfo;
+			return;
+		}
+		// if we find what we are looking for
+		if (strcmp(fileInfo.fname, currentFileInfo.fname) == 0)
+		{
+			// get the next file
+			f_readdir(&slideShowRootDir, &currentFileInfo);
+			// if it was the last file get the first file
+			if (strcmp(currentFileInfo.fname, "\0") == 0)
+			{
+				f_closedir(&slideShowRootDir);
+				f_opendir(&slideShowRootDir, "0:");
+				f_readdir(&slideShowRootDir, &currentFileInfo);
+			}
+			return;
+		}
+		// Completed a round with no find
+		if (strcmp(fileInfo.fname, "\0") == 0)
+		{
+			completedRound = 1;
+			f_closedir(&slideShowRootDir);
+			f_opendir(&slideShowRootDir, "0:");
+		}
+	}
+}
+
+void findNextViewable()
+{
+	char fullPath[16];
+	f_opendir(&slideShowRootDir, "0:");
+	while (true)
+	{
+		findNextFile();
+		sprintf(fullPath, "0:%s", currentFileInfo.fname);
+		pBtmpInst = BitmapOpen(fullPath);
+		if (pBtmpInst != 0)
+		{
+			break;
+		}
+	}
+	f_closedir(&slideShowRootDir);
+}
+
+void DrawNextPicture()
+{
+	findNextViewable();
+	BitmapDraw(pBtmpInst, &Context, 0, 0);
+	BitmapClose(pBtmpInst);
+}
+
+void DrawNextPictureHandler()
+{
+	TimerIntDisable(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
+	TimerIntClear(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
+	DrawNextPicture();
+	updateClock();
+	TimerIntEnable(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
 }
 
 // interval between pictures (in seconds >= 3)
@@ -101,7 +172,7 @@ void startSlideShowApp(int interval)
 		return;
 	}
 
-	f_opendir(&rootDir, "0:");
+	f_opendir(&slideShowRootDir, "0:");
 
 	unsigned char numOfViewables = areThereViewableBmpFiles();
 	if (numOfViewables == 0) // No viewable photos
@@ -117,83 +188,18 @@ void startSlideShowApp(int interval)
 	}
 	else // More than one viewable photos. Start slideshow timer
 	{
-		startTimer(interval);
 		DrawNextPicture();
+		startTimer(interval);
 	}
 	WidgetPaint(WIDGET_ROOT);
-}
-
-void findNextFile()
-{
-	FILINFO fileInfo;
-	int completedRound = 0;
-	while (true)
-	{
-		// get the first file
-		f_readdir(&rootDir, &fileInfo);
-		// if we are looking for a ghost or checked all the files already, return
-		if (completedRound || strcmp(currentFileInfo.fname, "\0") == 0)
-		{
-			currentFileInfo = fileInfo;
-			return;
-		}
-		// if we find what we are looking for
-		if (strcmp(fileInfo.fname, currentFileInfo.fname) == 0)
-		{
-			// get the next file
-			f_readdir(&rootDir, &currentFileInfo);
-			// if it was the last file get the first file
-			if (strcmp(currentFileInfo.fname, "\0") == 0)
-			{
-				f_closedir(&rootDir);
-				f_opendir(&rootDir, "0:");
-				f_readdir(&rootDir, &currentFileInfo);
-			}
-			return;
-		}
-		// Completed a round with no find
-		if (strcmp(fileInfo.fname, "\0") == 0)
-		{
-			completedRound = 1;
-			f_closedir(&rootDir);
-			f_opendir(&rootDir,"0:");
-		}
-	}
-}
-
-void findNextViewable()
-{
-	char fullPath[16];
-	f_opendir(&rootDir,"0:");
-	while (true)
-	{
-		findNextFile();
-		sprintf(fullPath, "0:%s", currentFileInfo.fname);
-		pBtmpInst = BitmapOpen(fullPath);
-		if (pBtmpInst != 0)
-		{
-			break;
-		}
-	}
-	f_closedir(&rootDir);
-}
-
-void DrawNextPicture()
-{
-	TimerIntDisable(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
-	TimerIntClear(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
-
-	findNextViewable();
-	BitmapDraw(pBtmpInst, &Context, 0, 0);
-	BitmapClose(pBtmpInst);
-	TimerIntEnable(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
 }
 
 void exitSlideshowApp()
 {
 	hideClock();
-	TimerIntDisable(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
 	TimerDisable(TIMER0_BASE, TIMER_A);
+	TimerIntDisable(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
+	TimerIntClear(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
 	WidgetRemove((tWidget*) &GeneralErrorMsg);
 	WidgetRemove((tWidget*) &exitBtn);
 	BitmapClose(pBtmpInst);

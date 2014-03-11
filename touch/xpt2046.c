@@ -109,7 +109,7 @@ void xpt2046_init()
 
 	/* Configure the SPI port */
 	SSIConfigSetExpClk(TOUCH_SPI_PORT_BASE, SysCtlClockGet(), SSI_FRF_MOTO_MODE_0,
-			SSI_MODE_MASTER, 200000, 8);
+			SSI_MODE_MASTER, TOUCH_SPI_MAX_SPEED, 8);
 	SSIEnable(TOUCH_SPI_PORT_BASE);
 
 	// Make a dummy read just so IRQ will be active

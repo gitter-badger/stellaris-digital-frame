@@ -54,7 +54,7 @@ void SysTickHandler(void)
 	//
 	disk_timerproc();
 	ticks++;
-	if (ticks == 100)
+	if (ticks == 100) //Every half a second update the clock
 	{
 		ticks = 0;
 		updateClock();
@@ -69,8 +69,6 @@ int main(void)
 	SysCtlClockSet(
 			SYSCTL_SYSDIV_2_5 | SYSCTL_USE_PLL | SYSCTL_OSC_MAIN
 					| SYSCTL_XTAL_16MHZ);
-
-	printf("clock is %d\n", SysCtlClockGet());
 	//
 	// Configure SysTick for a 100Hz interrupt.
 	//

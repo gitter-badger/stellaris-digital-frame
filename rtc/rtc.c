@@ -12,7 +12,7 @@
 #include "driverlib/ssi.h"
 #include "driverlib/sysctl.h"
 #include "driverlib/interrupt.h"
-
+#include "../touch/xpt2046.h" // Just for SPI speed value
 #include "rtc.h"
 
 #define BCD_TO_INT(X) ((X) & 0x0F) + (10*((X) >> 4))
@@ -28,7 +28,7 @@ void rtc_deselect()
 	GPIOPinWrite(RTC_CS_PORT_BASE, RTC_CS_PIN, RTC_CS_PIN);
 	SSIDisable(RTC_SPI_PORT_BASE);
 	SSIConfigSetExpClk(RTC_SPI_PORT_BASE, SysCtlClockGet(), SSI_FRF_MOTO_MODE_0,
-			SSI_MODE_MASTER, 200000, 8);
+			SSI_MODE_MASTER, TOUCH_SPI_MAX_SPEED, 8);
 	/* Deassert the chip select */
 	SSIEnable(RTC_SPI_PORT_BASE);
 }
@@ -37,7 +37,7 @@ void rtc_select()
 {
 	SSIDisable(RTC_SPI_PORT_BASE);
 	SSIConfigSetExpClk(RTC_SPI_PORT_BASE, SysCtlClockGet(), SSI_FRF_MOTO_MODE_1,
-			SSI_MODE_MASTER, 200000, 8);
+			SSI_MODE_MASTER, RTC_SPI_MAX_SPEED, 8);
 	SSIEnable(RTC_SPI_PORT_BASE);
 	GPIOPinWrite(RTC_CS_PORT_BASE, RTC_CS_PIN, 0);
 //	SysCtlDelay(10);
@@ -90,7 +90,7 @@ void rtc_init()
 
 	/* Configure the SPI port */
 	SSIConfigSetExpClk(RTC_SPI_PORT_BASE, SysCtlClockGet(), SSI_FRF_MOTO_MODE_1,
-			SSI_MODE_MASTER, 200000, 8);
+			SSI_MODE_MASTER, RTC_SPI_MAX_SPEED, 8);
 	SSIEnable(RTC_SPI_PORT_BASE);
 }
 

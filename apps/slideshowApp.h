@@ -9,6 +9,6 @@
 #define SLIDESHOWAPP_H_
 
 void startSlideShowApp(int interval);
-extern void DrawNextPicture();
+extern void DrawNextPictureHandler();
 
 #endif /* SLIDESHOWAPP_H_ */
