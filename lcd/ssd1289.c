@@ -8,7 +8,6 @@
 #include "driverlib/interrupt.h"
 #include "driverlib/sysctl.h"
 #include "driverlib/timer.h"
-#include "LCD_Backlight.h"
 
 const unsigned char font_ascii[95][16];
 

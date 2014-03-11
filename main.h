@@ -1,6 +1,5 @@
 #ifndef _MAIN_H_
 #define _MAIN_H_
-#include "tools.h"
 
 //----- DEFINES -----
 //Application settings

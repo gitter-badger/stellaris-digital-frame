@@ -75,8 +75,9 @@ void PixelDrawMultiple(void *pvDisplayData, long lX, long lY, long lX0,
 				// Draw this pixel in the appropriate color.
 				//
 				ssd1289_pixel(
-						ColorTranslate(0,(((((unsigned long *) pucPalette)[(ulByte
-								>> (7 - lX0)) & 1])))), lY, lX++);
+						ColorTranslate(0,
+								(((((unsigned long *) pucPalette)[(ulByte
+										>> (7 - lX0)) & 1])))), lY, lX++);
 				//WriteData(((unsigned long *)pucPalette)[(ulByte >>(7 - lX0)) & 1]);
 			}
 
@@ -181,12 +182,12 @@ void PixelDrawMultiple(void *pvDisplayData, long lX, long lY, long lX0,
 			// Get the next byte of pixel data and extract the
 			// corresponding entry from the palette.
 			//
-			ulByte = *pucData++ * 3;
-			ulByte = *(unsigned long *) (pucPalette + ulByte) & 0x00ffffff;
-
+			ulByte = *pucData++;
+			ulByte = *(unsigned long *) (ulByte) & 0x00ffffff;
 			//
 			// Translate this palette entry and write it to the screen.
 			//
+
 			ssd1289_pixel((color_t) ColorTranslate(0, ulByte), lY, lX++);
 		}
 
@@ -204,7 +205,6 @@ void PixelDrawMultiple(void *pvDisplayData, long lX, long lY, long lX0,
 		//
 	case 16:
 	{
-		unsigned short usByte;
 
 		//
 		// Loop while there are more pixels to draw.
@@ -215,21 +215,22 @@ void PixelDrawMultiple(void *pvDisplayData, long lX, long lY, long lX0,
 			// Get the next byte of pixel data and extract the
 			// corresponding entry from the palette.
 			//
-			usByte = *((unsigned short *) pucData);
+			ulByte = *((unsigned short *) pucData);
 			pucData += 2;
 
 			//
 			// Translate this palette entry and write it to the screen.
 			//
-			ssd1289_pixel((color_t) ColorTranslate(0, ulByte), lY, lX++);
+			ssd1289_pixel(ulByte, lY, lX++);
 		}
 	}
 	}
 }
+
 void RectFill(void *pvDisplayData, const tRectangle *pRect,
 		unsigned long ulValue)
 {
-	unsigned int x1, x2, y1, y2, trueColor;
+	unsigned int x1, x2, y1, y2;
 	x1 = pRect->sXMin;
 	x2 = pRect->sXMax;
 	y1 = pRect->sYMin;
@@ -237,7 +238,7 @@ void RectFill(void *pvDisplayData, const tRectangle *pRect,
 
 	for (; x1 <= x2; x1++)
 	{
-		ssd1289_vline(ulValue, y1, x1, y2 - y1);
+		ssd1289_vline(ColorTranslate(0,ulValue), y1, x1, y2 - y1);
 	}
 }
 

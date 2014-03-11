@@ -370,7 +370,11 @@ BitmapDraw(tBitmapInst *pInst, tContext *pContext, short sX, short sY)
             }
             else
             {
-                g_usPalette[ulLoop] =
+//            	unsigned long red = ulColor & 0x00FF0000;
+//            	unsigned long green = ulColor & 0x0000FF00;
+//            	unsigned long blue = ulColor & 0x000000FF;
+//            	unsigned long fixedColor = (red << 16) | (green) | (blue >> 16);
+            	g_usPalette[ulLoop] =
                     (unsigned short)pContext->pDisplay->pfnColorTranslate(
                                         pContext->pDisplay->pvDisplayData,
                                         ulColor);
@@ -466,11 +470,11 @@ BitmapDraw(tBitmapInst *pInst, tContext *pContext, short sX, short sY)
         //
         // Now draw the line of converted pixels onto the display.
         //
-        pContext->pDisplay->pfnPixelDrawMultiple(
-                                   pContext->pDisplay->pvDisplayData,
-                                   sX, sY + (short)ulHeight, 0,
-                                   (unsigned short)ulWidth, 8,
-                                   (unsigned char *)g_usPixelBuffer, 0);
+        int x_index = 0;
+        for (x_index = 0; x_index < ulWidth; x_index++)
+        {
+        	pContext->pDisplay->pfnPixelDraw(pContext->pDisplay,x_index,ulHeight,g_usPixelBuffer[x_index]);
+        }
 
         //
         // Move to the next (or previous depending upon our point-of-view) line.
@@ -483,3 +487,4 @@ BitmapDraw(tBitmapInst *pInst, tContext *pContext, short sX, short sY)
     //
     return(true);
 }
+

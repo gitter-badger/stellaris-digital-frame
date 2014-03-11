@@ -7,10 +7,13 @@
 
 #include <stdio.h>
 #include "../rtc/rtc.h"
-#include "setTimeApp.h"
+#include "grlib/grlib.h"
+#include "grlib/widget.h"
 #include "grlib/container.h"
 #include "grlib/pushbutton.h"
 #include "../lcd/grlibDriver.h"
+#include "mainMenuApp.h"
+#include "setTimeApp.h"
 
 // Positioning and sizing constants
 #define CONTAINER_HIEGHT 90
@@ -60,6 +63,9 @@ void yearsUpBtnClk();
 void yearsDownBtnClk();
 
 void exitBackToMenu();
+
+Canvas(setTimeBackgroundCanvas, WIDGET_ROOT, 0, 0, &DisplayStructure, 0, 0, 319,
+		239, CANVAS_STYLE_FILL, ClrBlack, ClrWhite, ClrBlack, 0, 0, 0, 0);
 
 ///
 /// Containers for controls
@@ -317,14 +323,14 @@ void yearsDownBtnClk()
 	WidgetPaint((tWidget*)&yearsTextBox);
 }
 
-void onCommitClick()
+void onCommitClick(tWidget* pWidget)
 {
 	ds3234_write_date(&date);
 	ds3234_write_time(&time);
 	exitBackToMenu();
 }
 
-void onCancelClick()
+void onCancelClick(tWidget* pWidget)
 {
 	exitBackToMenu();
 }
@@ -345,18 +351,20 @@ RectangularButton(CancelBtn, 0, 0, 0, &DisplayStructure, 320/2 + 10,
 // Forward declaration
 void updateControls();
 
-void StartSetTimeApp(tCanvasWidget* pCanvas)
+void startSetTimeApp()
 {
 	ds3234_read_date(&date);
 	ds3234_read_time(&time);
 
 	updateControls();
 
-	WidgetAdd((tWidget*) pCanvas, (tWidget*) &timeSetBox);
-	WidgetAdd((tWidget*) pCanvas, (tWidget*) &dateSetBox);
+	WidgetAdd(WIDGET_ROOT, (tWidget*) &setTimeBackgroundCanvas);
 
-	WidgetAdd((tWidget*) pCanvas, (tWidget*) &CommitBtn);
-	WidgetAdd((tWidget*) pCanvas, (tWidget*) &CancelBtn);
+	WidgetAdd((tWidget*) &setTimeBackgroundCanvas, (tWidget*) &timeSetBox);
+	WidgetAdd((tWidget*) &setTimeBackgroundCanvas, (tWidget*) &dateSetBox);
+
+	WidgetAdd((tWidget*) &setTimeBackgroundCanvas, (tWidget*) &CommitBtn);
+	WidgetAdd((tWidget*) &setTimeBackgroundCanvas, (tWidget*) &CancelBtn);
 
 	WidgetAdd((tWidget*) &timeSetBox, (tWidget*) &hoursUpBtn);
 	WidgetAdd((tWidget*) &timeSetBox, (tWidget*) &hoursDownBtn);
@@ -408,6 +416,8 @@ void updateControls()
 
 void exitBackToMenu()
 {
+	WidgetRemove((tWidget*) &setTimeBackgroundCanvas);
+
 	WidgetRemove((tWidget*) &timeSetBox);
 	WidgetRemove((tWidget*) &dateSetBox);
 

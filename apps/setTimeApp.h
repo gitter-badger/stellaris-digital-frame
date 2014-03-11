@@ -12,7 +12,6 @@
 #include "grlib/widget.h"
 #include "grlib/canvas.h"
 
-void StartSetTimeApp(tCanvasWidget* widget);
-
+void startSetTimeApp();
 
 #endif /* SETTIMEAPP_H_ */

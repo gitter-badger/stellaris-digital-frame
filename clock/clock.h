@@ -12,13 +12,12 @@
 #include "grlib/widget.h"
 #include "grlib/canvas.h"
 
-
 extern tCanvasWidget clockWidget;
 
-void initClock(tContext*,const tDisplay*);
+void initClock(const tDisplay*);
 void updateClock();
 void removeClock();
-void showClock();
+void showClock(tWidget* parent);
 void hideClock();
 
 #endif /* CLOCK_H_ */
