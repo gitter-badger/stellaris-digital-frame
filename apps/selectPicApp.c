@@ -36,7 +36,6 @@ void onDownClick();
 void refreshPageCounter();
 void onClickDoNothing(tWidget* pWidget);
 
-const char* stringtemp[0];
 char * strings[FILE_LIST_LENGTH];
 char selectedFilename[15];
 char pageCounterString[10];
@@ -46,7 +45,7 @@ Canvas(selectPicBackgroundCanvas, 0, 0, 0, &DisplayStructure, 0, 0, 320, 240,
 
 ListBox(fileListBox, &selectPicBackgroundCanvas, 0, 0, &DisplayStructure, 0,
 		CLOCK_HEIGHT, 180, 200-CLOCK_HEIGHT, LISTBOX_STYLE_OUTLINE, ClrBlack,
-		ClrWhite, ClrWhite, ClrBlack, ClrWhite, g_pFontCm16, stringtemp,
+		ClrWhite, ClrWhite, ClrBlack, ClrWhite, g_pFontCm16, strings,
 		FILE_LIST_LENGTH, 0, onListBoxSelectionChange);
 
 CircularButton(upBtn, &fileListBox, 0, 0, &DisplayStructure, 180 - BTN_RADIUS,

@@ -473,7 +473,7 @@ BitmapDraw(tBitmapInst *pInst, tContext *pContext, short sX, short sY)
         int x_index = 0;
         for (x_index = 0; x_index < ulWidth; x_index++)
         {
-        	pContext->pDisplay->pfnPixelDraw(pContext->pDisplay,x_index,ulHeight,g_usPixelBuffer[x_index]);
+        	pContext->pDisplay->pfnPixelDraw((void*)pContext->pDisplay,x_index,ulHeight,g_usPixelBuffer[x_index]);
         }
 
         //
