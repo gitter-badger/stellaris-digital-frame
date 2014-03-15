@@ -151,6 +151,7 @@ void startSelectPicApp()
 				(tWidget*) &GeneralErrorMsg);
 		CanvasTextSet(&GeneralErrorMsg, "No filesystem found!");
 		WidgetPaint(WIDGET_ROOT);
+		xpt2046_enableTouchIRQ();
 		return;
 	}
 
