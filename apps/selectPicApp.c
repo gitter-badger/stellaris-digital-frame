@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include "inc/hw_types.h"
 #include "../lcd/grlibDriver.h"
+#include "../touch/xpt2046.h"
 #include "../third_party/fatfs/src/ff.h"
 #include "grlib/grlib.h"
 #include "grlib/widget.h"
@@ -159,10 +160,12 @@ void startSelectPicApp()
 	refreshPageCounter();
 	WidgetAdd((tWidget*) &selectPicBackgroundCanvas, (tWidget*) &fileListBox);
 	WidgetPaint(WIDGET_ROOT);
+	xpt2046_enableTouchIRQ();
 }
 
 void exitSelectPicApp()
 {
+	xpt2046_disableTouchIRQ();
 	hideClock();
 	int i = 0;
 	for (; i < FILE_LIST_LENGTH; i++)

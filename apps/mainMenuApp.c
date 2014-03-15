@@ -6,6 +6,7 @@
  */
 
 #include "../lcd/grlibDriver.h"
+#include "../touch/xpt2046.h"
 #include "grlib/grlib.h"
 #include "grlib/widget.h"
 #include "grlib/canvas.h"
@@ -96,10 +97,12 @@ void startMainMenuApplication()
 			(tWidget*) &startSlideshowBtn);
 
 	WidgetPaint(WIDGET_ROOT);
+	xpt2046_enableTouchIRQ();
 }
 
 void exitMainMenuApp()
 {
+	xpt2046_disableTouchIRQ();
 	hideClock();
 	WidgetRemove((tWidget*) &mainMenuBackgroundCanvas);
 	WidgetRemove((tWidget*) &setTimeBtn);

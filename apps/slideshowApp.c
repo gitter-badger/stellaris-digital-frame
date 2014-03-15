@@ -14,6 +14,7 @@
 #include "../bmp/bmpfile.h"
 #include "../bmp/bmpdisplay.h"
 #include "../third_party/fatfs/src/ff.h"
+#include "../touch/xpt2046.h"
 #include "grlib/grlib.h"
 #include "grlib/widget.h"
 #include "grlib/canvas.h"
@@ -192,10 +193,12 @@ void startSlideShowApp(int interval)
 		startTimer(interval);
 	}
 	WidgetPaint(WIDGET_ROOT);
+	xpt2046_enableTouchIRQ();
 }
 
 void exitSlideshowApp()
 {
+	xpt2046_disableTouchIRQ();
 	hideClock();
 	TimerDisable(TIMER0_BASE, TIMER_A);
 	TimerIntDisable(TIMER0_BASE, TIMER_TIMA_TIMEOUT);

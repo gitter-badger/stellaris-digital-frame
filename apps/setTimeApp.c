@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include "../rtc/rtc.h"
+#include "../touch/xpt2046.h"
 #include "grlib/grlib.h"
 #include "grlib/widget.h"
 #include "grlib/container.h"
@@ -391,6 +392,7 @@ void startSetTimeApp()
 	WidgetAdd((tWidget*) &dateSetBox, (tWidget*) &yearsTextBox);
 
 	WidgetPaint(WIDGET_ROOT);
+	xpt2046_enableTouchIRQ();
 }
 
 void updateControls()
@@ -416,6 +418,7 @@ void updateControls()
 
 void exitBackToMenu()
 {
+	xpt2046_disableTouchIRQ();
 	WidgetRemove((tWidget*) &setTimeBackgroundCanvas);
 
 	WidgetRemove((tWidget*) &timeSetBox);
