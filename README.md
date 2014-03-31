@@ -13,6 +13,9 @@ Featuring:
 - a slideshow of the pictures on the sdcard
 - choose a picture and show it
 
+Note:
+- Has support for 256 colors bmps only.
+
 Dependencies:
 - Texas Instruments Graphics lib
 - Texas Instruments Driver Lib
