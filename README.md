@@ -6,8 +6,7 @@ for the Stellaris LM3S9B92 evaluation board.
 
 The projcet files are for Code Composer Studio from TI.
 
-* This code can be used freely with no restrictions. *
-
+The code can be used freely with no restrictions.
 
 Featuring:
 - a real time clock showing on the top left of the screen at all times.
@@ -15,7 +14,7 @@ Featuring:
 - choose a picture and show it
 
 Dependencies:
-- Texas INstruments Graphics lib
+- Texas Instruments Graphics lib
 - Texas Instruments Driver Lib
 Both can be freely downloaded and used from Texas Instruments
 
