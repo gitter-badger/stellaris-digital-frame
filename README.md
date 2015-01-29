@@ -28,3 +28,6 @@ Peripherals used in the project:
 
 This application is easy port to your configuration.<br>
 <img src=https://raw.githubusercontent.com/itaykomemy/stellaris-digital-frame/master/images/20140308_220835.jpg />
+
+
+[![Join the chat at https://gitter.im/itaykomemy/stellaris-digital-frame](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/itaykomemy/stellaris-digital-frame?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
